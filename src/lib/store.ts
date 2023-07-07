@@ -6,13 +6,9 @@ interface Product {
 }
 
 interface CartState {
-  items: {
-    productId: string;
-    quantity: number;
-  }[];
-  addToCart: (product: Product) => void;
-  removeFromCart: (product: Product) => void;
-  calculateTotal: () => number;
+  items: Map<string, number>;
+  addToCart: (product: Product, amount?: number) => void;
+  removeFromCart: (product: Product, amount?: number) => void;
 }
 
 interface ProductsState {
@@ -21,6 +17,27 @@ interface ProductsState {
   removeProduct: (product: Product) => void;
   editProduct: (product: Product) => void;
 }
+
+export const useCart = create<CartState>()((set) => ({
+  items: new Map(),
+  addToCart: (product, amount = 1) =>
+    set((state) => ({
+      items: new Map(state.items).set(
+        product.id,
+        state.items.get(product.id) ?? 0 + amount
+      ),
+    })),
+  removeFromCart: (product, amount = 1) =>
+    set((state) => {
+      const currentMap = new Map(state.items);
+      const currentAmount = currentMap.get(product.id) ?? 0;
+      if (currentAmount <= amount) currentMap.delete(product.id);
+      else currentMap.set(product.id, currentAmount - amount);
+      return {
+        items: currentMap,
+      };
+    }),
+}));
 
 export const useProducts = create<ProductsState>()((set) => ({
   productsAvailable: [],
