@@ -7,11 +7,11 @@ type Product = RouterOutputs["product"]["getAll"][number];
 const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: "Name",
+    header: "Nombre",
   },
   {
     accessorKey: "price",
-    header: () => <div className="text-right">Amount</div>,
+    header: () => <div className="text-right">Precio</div>,
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("price"));
       const formatted = new Intl.NumberFormat("en-US", {
