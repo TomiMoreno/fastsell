@@ -1,5 +1,7 @@
-import { z } from "zod";
-import { createProductSchema } from "~/lib/schemas";
+import {
+  createProductSchema,
+  updateProductSchema,
+} from "~/lib/schemas/product";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
 export const productRouter = createTRPCRouter({
@@ -20,13 +22,7 @@ export const productRouter = createTRPCRouter({
       return product;
     }),
   update: publicProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        name: z.string(),
-        price: z.number(),
-      })
-    )
+    .input(updateProductSchema)
     .mutation(async ({ ctx, input }) => {
       const product = await ctx.prisma.product.update({
         where: {
@@ -35,6 +31,7 @@ export const productRouter = createTRPCRouter({
         data: {
           name: input.name,
           price: input.price,
+          stock: input.stock,
         },
       });
       return product;

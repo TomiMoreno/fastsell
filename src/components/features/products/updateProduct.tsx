@@ -13,58 +13,60 @@ import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  type CreateProductSchema,
-  createProductSchema,
+  updateProductSchema,
+  type UpdateProductSchema,
 } from "~/lib/schemas/product";
 import { toast } from "~/components/ui/use-toast";
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Edit } from "lucide-react";
 import Field from "~/components/ui/field";
 
-function CreateProduct() {
+type UpdateProductProps = {
+  product: UpdateProductSchema;
+};
+
+function UpdateProduct({ product }: UpdateProductProps) {
   const [open, setOpen] = useState(false);
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="default">
-          <Plus className="mr-2 h-4 w-4" />
-          Agregar producto
+          <Edit className="h-4 w-4" />
         </Button>
       </SheetTrigger>
       <SheetContent side="right">
         <SheetHeader>
-          <SheetTitle>Agrega un nuevo producto</SheetTitle>
+          <SheetTitle>Edita el producto</SheetTitle>
           <SheetDescription>
-            Aca es donde podes agregar un nuevo producto
+            Aca es donde editas el producto seleccionado crack!
           </SheetDescription>
         </SheetHeader>
-        <ProductForm closeSheet={() => setOpen(false)} />
+        <ProductForm closeSheet={() => setOpen(false)} product={product} />
       </SheetContent>
     </Sheet>
   );
 }
 
-const ProductForm = ({ closeSheet }: { closeSheet: () => void }) => {
-  const form = useForm<CreateProductSchema>({
-    resolver: zodResolver(createProductSchema),
-    defaultValues: {
-      name: "",
-      price: 0,
-      stock: 0,
-    },
+const ProductForm = ({
+  closeSheet,
+  product,
+}: UpdateProductProps & { closeSheet: () => void }) => {
+  const form = useForm<UpdateProductSchema>({
+    resolver: zodResolver(updateProductSchema),
+    defaultValues: product,
     mode: "onBlur",
   });
   const context = api.useContext();
-  const { mutateAsync, isLoading } = api.product.create.useMutation({
+  const { mutateAsync, isLoading } = api.product.update.useMutation({
     onSuccess: () => {
       void context.product.getAll.invalidate();
     },
   });
-  async function onSubmit(values: CreateProductSchema) {
+  async function onSubmit(values: UpdateProductSchema) {
     const createdValues = await mutateAsync(values);
     closeSheet();
     toast({
-      title: "Producto agregado!",
+      title: "Producto actualizado!",
       description: (
         <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
           <code className="text-white">
@@ -91,11 +93,11 @@ const ProductForm = ({ closeSheet }: { closeSheet: () => void }) => {
           type="number"
         />
         <Button type="submit" disabled={isLoading}>
-          Agregar!
+          Actualizar!
         </Button>
       </form>
     </Form>
   );
 };
 
-export default CreateProduct;
+export default UpdateProduct;

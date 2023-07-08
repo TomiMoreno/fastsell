@@ -1,8 +1,10 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "~/components/ui/dataTable";
+import UpdateProduct from "~/components/features/products/updateProduct";
+import { formatCurrency } from "~/lib/utils";
 import { type RouterOutputs, api } from "~/utils/api";
 
-type Product = RouterOutputs["product"]["getAll"][number];
+type Product = RouterOutputs["product"]["getAll"][0];
 
 const columns: ColumnDef<Product>[] = [
   {
@@ -13,12 +15,7 @@ const columns: ColumnDef<Product>[] = [
     accessorKey: "price",
     header: () => <div className="text-right">Precio</div>,
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("price"));
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(amount);
-
+      const formatted = formatCurrency(row.getValue("price"));
       return <div className="text-right font-medium">{formatted}</div>;
     },
   },
@@ -26,11 +23,23 @@ const columns: ColumnDef<Product>[] = [
     accessorKey: "stock",
     header: "Stock",
   },
+  {
+    header: "Edit",
+    cell: ({ row }) => (
+      <UpdateProduct
+        product={{
+          id: row.original.id,
+          name: row.getValue("name"),
+          price: row.getValue("price"),
+          stock: row.getValue("stock"),
+        }}
+      />
+    ),
+  },
 ];
 
 export default function ProductTable() {
   const { data, isLoading } = api.product.getAll.useQuery();
-
   return (
     <div className="container mx-auto py-10">
       {isLoading ? (
