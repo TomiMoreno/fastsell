@@ -32,7 +32,7 @@ function ProductGrid() {
   return (
     <div className="container mx-auto py-10">
       <h1 className="text-3xl font-bold">Productos</h1>
-      <h2 className="text-xl font-bold">Total: {total}</h2>
+      <h2 className="fixed right-0 top-0 text-xl font-bold">Total: {total}</h2>
       <div className="max-w-xxl grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {data?.map((product) => (
           <ProductCard
@@ -52,7 +52,7 @@ function ProductGrid() {
           className="col-span-full"
           onClick={() => handleBuy()}
         >
-          Comprar carrito
+          Comprar carrito, Total {total}
         </Button>
       </div>
     </div>
