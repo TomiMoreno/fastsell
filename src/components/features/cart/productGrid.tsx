@@ -49,7 +49,7 @@ function ProductGrid() {
         ))}
         <Button
           variant="default"
-          className="col-span-full"
+          className="fixed bottom-0 col-span-full w-full"
           onClick={() => handleBuy()}
         >
           Comprar carrito, Total {total}
