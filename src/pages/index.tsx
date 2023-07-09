@@ -9,13 +9,15 @@ export default function Home() {
           TIENDAAAAAAAA
         </h1>
       </div>
-      <Button size="lg">COMPRAR AHORA</Button>
+      <Link href="/cart">
+        <Button size="lg">COMPRAR AHORA</Button>
+      </Link>
       <Link href="/products">
         <Button variant="secondary" size="lg">
           Agregar producto
         </Button>
       </Link>
-      <Button
+      {/* <Button
         variant="destructive"
         size="lg"
         className="fixed bottom-5 right-5"
@@ -24,7 +26,7 @@ export default function Home() {
         }}
       >
         DESTRUIR AHORA
-      </Button>
+      </Button> */}
     </>
   );
 }

@@ -1,14 +1,14 @@
 import { create } from "zustand";
-
-interface Product {
-  id: string;
-  price: number;
-}
+import { type Product } from "./schemas/product";
 
 interface CartState {
-  items: Map<string, number>;
-  addToCart: (product: Product, amount?: number) => void;
-  removeFromCart: (product: Product, amount?: number) => void;
+  items: Map<string, { product: Product; amount: number }>;
+  addToCart: (product: Product, price: number, amount?: number) => void;
+  removeFromCart: (product: Product, price: number, amount?: number) => void;
+  changeAmount: (product: Product, price: number, amount: number) => void;
+  total: number;
+  buy: () => void;
+  reset: () => void;
 }
 
 interface ProductsState {
@@ -20,23 +20,50 @@ interface ProductsState {
 
 export const useCart = create<CartState>()((set) => ({
   items: new Map(),
-  addToCart: (product, amount = 1) =>
-    set((state) => ({
-      items: new Map(state.items).set(
-        product.id,
-        state.items.get(product.id) ?? 0 + amount
-      ),
-    })),
-  removeFromCart: (product, amount = 1) =>
+  total: 0,
+  addToCart: (product, price, amount = 1) =>
     set((state) => {
       const currentMap = new Map(state.items);
-      const currentAmount = currentMap.get(product.id) ?? 0;
-      if (currentAmount <= amount) currentMap.delete(product.id);
-      else currentMap.set(product.id, currentAmount - amount);
+      const currentAmount = currentMap.get(product.id)?.amount ?? 0;
+      currentMap.set(product.id, {
+        product,
+        amount: currentAmount + amount,
+      });
       return {
         items: currentMap,
+        total: state.total + price * amount,
       };
     }),
+  changeAmount: (product, price, amount) =>
+    set((state) => {
+      const currentMap = new Map(state.items);
+      const currentAmount = currentMap.get(product.id)?.amount ?? 0;
+      if (amount <= 0) currentMap.delete(product.id);
+      else
+        currentMap.set(product.id, {
+          product,
+          amount,
+        });
+      const differenceInAmount = amount - currentAmount;
+      return {
+        items: currentMap,
+        total: state.total + price * differenceInAmount,
+      };
+    }),
+  removeFromCart: (product, price, amount = 1) =>
+    set((state) => {
+      const currentMap = new Map(state.items);
+      const currentAmount = currentMap.get(product.id)?.amount ?? 0;
+      if (currentAmount <= amount) currentMap.delete(product.id);
+      else
+        currentMap.set(product.id, { product, amount: currentAmount - amount });
+      return {
+        items: currentMap,
+        total: state.total - price * amount,
+      };
+    }),
+  buy: () => set(() => ({ items: new Map() })),
+  reset: () => set(() => ({ items: new Map(), total: 0 })),
 }));
 
 export const useProducts = create<ProductsState>()((set) => ({

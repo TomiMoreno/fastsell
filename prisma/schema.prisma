@@ -38,7 +38,8 @@ model ProductSale {
     productId String
     sale      Sale     @relation(fields: [saleId], references: [id])
     saleId    String
-    quantity  Int
+    amount    Int
+    price     Float
 
     @@index([productId])
     @@index([saleId])
@@ -50,5 +51,4 @@ model Sale {
     updatedAt DateTime      @updatedAt
     products  ProductSale[]
     total     Float
-    clientId  String
 }
