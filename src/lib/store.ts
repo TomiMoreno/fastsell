@@ -59,7 +59,7 @@ export const useCart = create<CartState>()((set) => ({
         currentMap.set(product.id, { product, amount: currentAmount - amount });
       return {
         items: currentMap,
-        total: state.total - price * amount,
+        total: Math.max(0, state.total - price * amount),
       };
     }),
   buy: () => set(() => ({ items: new Map() })),
