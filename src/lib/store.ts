@@ -54,6 +54,7 @@ export const useCart = create<CartState>()((set) => ({
     set((state) => {
       const currentMap = new Map(state.items);
       const currentAmount = currentMap.get(product.id)?.amount ?? 0;
+      if (currentAmount === 0) return state;
       if (currentAmount <= amount) currentMap.delete(product.id);
       else
         currentMap.set(product.id, { product, amount: currentAmount - amount });

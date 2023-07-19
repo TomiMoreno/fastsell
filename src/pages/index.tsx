@@ -3,30 +3,23 @@ import { Button } from "~/components/ui/button";
 
 export default function Home() {
   return (
-    <>
-      <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
-        <h1 className="text-3xl font-extrabold tracking-tight  sm:text-[5rem]">
-          TIENDAAAAAAAA
-        </h1>
+    <div className="container flex flex-col justify-center gap-12 px-4 py-16 ">
+      <h1 className="text-3xl font-extrabold tracking-tight  sm:text-[5rem]">
+        FastSell
+      </h1>
+      <p className="text-xl text-gray-500">
+        Vende tus productos de forma rápida y sencilla
+      </p>
+      <div className="flex flex-wrap gap-4">
+        <Link href="/products">
+          <Button variant="secondary" size="lg">
+            Administra tus productos
+          </Button>
+        </Link>
+        <Link href="/cart">
+          <Button size="lg">Crea una venta</Button>
+        </Link>
       </div>
-      <Link href="/cart">
-        <Button size="lg">COMPRAR AHORA</Button>
-      </Link>
-      <Link href="/products">
-        <Button variant="secondary" size="lg">
-          Agregar producto
-        </Button>
-      </Link>
-      {/* <Button
-        variant="destructive"
-        size="lg"
-        className="fixed bottom-5 right-5"
-        onClick={() => {
-          document.body.innerHTML = "💥".repeat(10000);
-        }}
-      >
-        DESTRUIR AHORA
-      </Button> */}
-    </>
+    </div>
   );
 }

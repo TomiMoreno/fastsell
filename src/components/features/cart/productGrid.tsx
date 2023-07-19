@@ -42,8 +42,10 @@ function ProductGrid() {
         value={seacrh}
         onChange={(e) => setSeacrh(e.target.value)}
         ref={ref}
+        className="my-4"
+        placeholder="Buscar producto"
       />
-      <div className="max-w-xxl grid grid-cols-1">
+      <div className="max-w-xxl mx-auto grid grid-cols-1 gap-4">
         {data
           ?.filter((product) =>
             product.name.toLowerCase().includes(seacrh.toLowerCase())
@@ -63,7 +65,7 @@ function ProductGrid() {
           ))}
         <Button
           variant="default"
-          className="fixed bottom-0 col-span-full w-full"
+          className="fixed bottom-2 left-8 right-8 col-span-full "
           onClick={() => handleBuy()}
         >
           Comprar carrito, Total {total}
