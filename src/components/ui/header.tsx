@@ -5,7 +5,7 @@ import { cn } from "~/lib/utils";
 
 function Header() {
   return (
-    <header className="flex items-center justify-between border-b border-foreground/10 p-4">
+    <header className="flex items-center justify-between border-b border-foreground/10 bg-background p-4">
       <MainNav />
     </header>
   );
@@ -17,7 +17,9 @@ export function MainNav() {
   return (
     <div className="mr-4 flex">
       <Link href="/" className="mr-6 flex items-center space-x-2">
-        <span className=" inline-block font-bold">{siteConfig.name}</span>
+        <span className=" inline-block font-bold text-primary">
+          {siteConfig.name}
+        </span>
       </Link>
       <nav className="flex items-center space-x-6 text-sm font-medium">
         <Link
@@ -27,7 +29,7 @@ export function MainNav() {
             pathname === "/cart" ? "text-foreground" : "text-foreground/60"
           )}
         >
-          Cart
+          Carrito
         </Link>
         <Link
           href="/products"
@@ -38,7 +40,7 @@ export function MainNav() {
               : "text-foreground/60"
           )}
         >
-          Products
+          Productos
         </Link>
       </nav>
     </div>

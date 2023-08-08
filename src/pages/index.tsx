@@ -3,11 +3,11 @@ import { Button } from "~/components/ui/button";
 
 export default function Home() {
   return (
-    <div className="container flex flex-col justify-center gap-12 px-4 py-16 ">
-      <h1 className="text-3xl font-extrabold tracking-tight  sm:text-[5rem]">
+    <div className="container flex flex-col justify-center gap-12 px-4 py-16">
+      <h1 className="text-3xl font-extrabold tracking-tight text-secondary-foreground sm:text-[5rem]">
         FastSell
       </h1>
-      <p className="text-xl text-gray-500">
+      <p className="text-xl  text-secondary-foreground">
         Vende tus productos de forma rápida y sencilla
       </p>
       <div className="flex flex-wrap gap-4">

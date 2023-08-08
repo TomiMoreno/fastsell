@@ -49,7 +49,7 @@ export default function ProductCard({
       <CardContent className="flex flex-row items-center justify-between">
         <div className="flex space-x-4 text-sm text-muted-foreground">
           <div className="flex items-center">
-            <CircleIcon className="mr-1 h-3 w-3 fill-sky-400 text-sky-400" />
+            <CircleIcon className="mr-1 h-3 w-3 fill-primary stroke-primary text-primary" />
             {product.stock}
           </div>
           <div className="flex items-center">

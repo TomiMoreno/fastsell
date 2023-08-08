@@ -37,7 +37,6 @@ function ProductGrid() {
   return (
     <div className="container mx-auto py-10">
       <h1 className="text-3xl font-bold">Productos</h1>
-      <h2 className="fixed right-0 top-0 text-xl font-bold">Total: {total}</h2>
       <Input
         value={seacrh}
         onChange={(e) => setSeacrh(e.target.value)}
