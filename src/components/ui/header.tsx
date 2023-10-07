@@ -2,11 +2,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { siteConfig } from "~/config/site";
 import { cn } from "~/lib/utils";
+import { ModeToggle } from "../theme/modeToggle";
 
 function Header() {
   return (
     <header className="flex items-center justify-between border-b border-foreground/10 bg-background p-4">
       <MainNav />
+      <ModeToggle />
     </header>
   );
 }
