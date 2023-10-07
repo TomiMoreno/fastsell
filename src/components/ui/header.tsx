@@ -4,6 +4,21 @@ import { siteConfig } from "~/config/site";
 import { cn } from "~/lib/utils";
 import { ModeToggle } from "../theme/modeToggle";
 
+const routes = [
+  {
+    name: "Carrito",
+    path: "/cart",
+  },
+  {
+    name: "Productos",
+    path: "/products",
+  },
+  {
+    name: "Ventas",
+    path: "/sales",
+  },
+];
+
 function Header() {
   return (
     <header className="flex items-center justify-between border-b border-foreground/10 bg-background p-4">
@@ -24,26 +39,18 @@ export function MainNav() {
         </span>
       </Link>
       <nav className="flex items-center space-x-6 text-sm font-medium">
-        <Link
-          href="/cart"
-          className={cn(
-            "transition-colors hover:text-foreground/80",
-            pathname === "/cart" ? "text-foreground" : "text-foreground/60"
-          )}
-        >
-          Carrito
-        </Link>
-        <Link
-          href="/products"
-          className={cn(
-            "transition-colors hover:text-foreground/80",
-            pathname?.startsWith("/products")
-              ? "text-foreground"
-              : "text-foreground/60"
-          )}
-        >
-          Productos
-        </Link>
+        {routes.map((route) => (
+          <Link
+            key={route.path}
+            href={route.path}
+            className={cn(
+              "transition-colors hover:text-foreground/80",
+              pathname === route.path ? "text-foreground" : "text-foreground/60"
+            )}
+          >
+            {route.name}
+          </Link>
+        ))}
       </nav>
     </div>
   );

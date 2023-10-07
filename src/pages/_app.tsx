@@ -21,7 +21,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
         disableTransitionOnChange
       >
         <Header />
-        <main className="flex min-h-screen flex-col items-center justify-center bg-background ">
+        <main className="flex grow flex-col items-center justify-start bg-background">
           <Component {...pageProps} />
         </main>
         <Toaster />
