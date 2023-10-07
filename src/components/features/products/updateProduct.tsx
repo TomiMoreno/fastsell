@@ -38,7 +38,7 @@ function UpdateProduct({ product }: UpdateProductProps) {
         <SheetHeader>
           <SheetTitle>Edita el producto</SheetTitle>
           <SheetDescription>
-            Aca es donde editas el producto seleccionado crack!
+            Acá es donde editas el producto seleccionado crack!
           </SheetDescription>
         </SheetHeader>
         <ProductForm closeSheet={() => setOpen(false)} product={product} />

@@ -35,7 +35,7 @@ function CreateProduct() {
         <SheetHeader>
           <SheetTitle>Agrega un nuevo producto</SheetTitle>
           <SheetDescription>
-            Aca es donde podes agregar un nuevo producto
+            Acá es donde podes agregar un nuevo producto
           </SheetDescription>
         </SheetHeader>
         <ProductForm closeSheet={() => setOpen(false)} />
