@@ -90,6 +90,7 @@ const ProductForm = ({ closeSheet }: { closeSheet: () => void }) => {
           control={form.control}
           type="number"
         />
+        <Field name="hotkey" label="Hotkey" control={form.control} />
         <Button type="submit" disabled={isLoading}>
           Agregar!
         </Button>

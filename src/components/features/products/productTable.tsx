@@ -12,26 +12,24 @@ const columns: ColumnDef<Product>[] = [
     header: "Nombre",
   },
   {
-    accessorKey: "price",
-    header: () => <div className="text-right">Precio</div>,
-    cell: ({ row }) => {
-      const formatted = formatCurrency(row.getValue("price"));
-      return <div className="text-right font-medium">{formatted}</div>;
-    },
-  },
-  {
     accessorKey: "stock",
     header: "Stock",
+  },
+  {
+    accessorKey: "price",
+    header: "Precio",
+    cell: ({ row }) => formatCurrency(row.getValue("price")),
+  },
+  {
+    header: "Hotkey",
+    cell: ({ row }) => row.original.hotkey ?? "-",
   },
   {
     header: "Edit",
     cell: ({ row }) => (
       <UpdateProduct
         product={{
-          id: row.original.id,
-          name: row.getValue("name"),
-          price: row.getValue("price"),
-          stock: row.getValue("stock"),
+          ...row.original,
         }}
       />
     ),

@@ -63,6 +63,7 @@ const ProductForm = ({
     },
   });
   async function onSubmit(values: UpdateProductSchema) {
+    console.log(values);
     const createdValues = await mutateAsync(values);
     closeSheet();
     toast({
@@ -92,6 +93,7 @@ const ProductForm = ({
           control={form.control}
           type="number"
         />
+        <Field name="hotkey" label="Hotkey" control={form.control} />
         <Button type="submit" disabled={isLoading}>
           Actualizar!
         </Button>

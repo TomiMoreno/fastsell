@@ -29,9 +29,7 @@ export const productRouter = createTRPCRouter({
           id: input.id,
         },
         data: {
-          name: input.name,
-          price: input.price,
-          stock: input.stock,
+          ...input,
         },
       });
       return product;

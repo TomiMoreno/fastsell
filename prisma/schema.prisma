@@ -27,6 +27,7 @@ model Product {
     price       Float
     stock       Int
     image       String
+    hotkey      String?
     ProductSale ProductSale[]
 }
 
