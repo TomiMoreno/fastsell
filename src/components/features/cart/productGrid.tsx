@@ -46,6 +46,7 @@ function ProductGrid() {
       {};
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (ref.current?.contains(e.target as Node)) return;
       const keyPressed = e.key.toLocaleLowerCase();
 
       const key = hotkeys[keyPressed];
