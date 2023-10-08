@@ -23,8 +23,11 @@ const columns: ColumnDef<Product>[] = [
   },
   {
     header: "Hotkey",
-    cell: ({ row }) =>
-      row.original.hotkey && <Kbd className="w-fit">{row.original.hotkey}</Kbd>,
+    cell: ({ row }) => (
+      <Kbd className="w-fit" disabled={!Boolean(row.original.hotkey)}>
+        {row.original.hotkey ?? "𝕏"}
+      </Kbd>
+    ),
   },
   {
     header: "Edit",
