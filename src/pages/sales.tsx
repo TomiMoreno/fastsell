@@ -1,4 +1,5 @@
 import SalesDashboard from "~/components/features/sales/dashboard";
+import SalesTable from "~/components/features/sales/salesTable";
 
 export default function Sales() {
   return (
@@ -7,6 +8,7 @@ export default function Sales() {
         Ventas
       </h1>
       <SalesDashboard />
+      <SalesTable />
     </>
   );
 }

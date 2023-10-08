@@ -6,7 +6,6 @@ import { ModeToggle } from "../theme/modeToggle";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -32,7 +31,7 @@ const routes = [
 
 function Header() {
   return (
-    <header className="flex items-center justify-between border-b border-foreground/10 bg-background p-4">
+    <header className="flex items-center justify-between border-b border-foreground/10 bg-background p-4 print:hidden">
       <MainNav />
       <ModeToggle />
     </header>

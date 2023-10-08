@@ -10,16 +10,10 @@ const SalesDashboard: React.FC = () => {
   if (isLoading) return <p>Cargando...</p>;
   if (!data) return <p>Error</p>;
 
-  const {
-    salesByProduct,
-    totalSales,
-    totalSalesAmount,
-    totalSold,
-    mostSoldProduct,
-  } = data;
+  const { totalSales, totalSalesAmount, totalSold, mostSoldProduct } = data;
 
   return (
-    <div className="grid w-full gap-4 px-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid w-full break-after-page gap-4 px-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Ventas totales</CardTitle>
@@ -69,6 +63,9 @@ const SalesDashboard: React.FC = () => {
           <div className="text-2xl font-bold">
             {mostSoldProduct?.name || "Ninguno"}
           </div>
+          <p className="text-xs text-muted-foreground">
+            {mostSoldProduct?.amount || 0} ventas
+          </p>
         </CardContent>
       </Card>
     </div>

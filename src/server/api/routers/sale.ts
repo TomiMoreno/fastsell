@@ -64,11 +64,6 @@ export const saleRouter = createTRPCRouter({
       return sale;
     }),
   dashboard: publicProcedure.query(async ({ ctx }) => {
-    const allProducts = await ctx.prisma.product.findMany();
-    const productMap = new Map(
-      allProducts.map((product) => [product.id, product])
-    );
-
     const productSales = await ctx.prisma.productSale.aggregate({
       _sum: {
         amount: true,
@@ -81,6 +76,42 @@ export const saleRouter = createTRPCRouter({
       },
     });
 
+    const mostSoldProduct = (
+      await ctx.prisma.productSale.groupBy({
+        by: ["productId"],
+        _sum: {
+          amount: true,
+        },
+        orderBy: {
+          _sum: {
+            amount: "desc",
+          },
+        },
+        take: 1,
+      })
+    )?.[0];
+
+    const mostSoldProductData = await ctx.prisma.product.findUnique({
+      where: {
+        id: mostSoldProduct?.productId,
+      },
+    });
+
+    return {
+      totalSold: productSales._sum.amount ?? 0,
+      totalSales: sales._count ?? 0,
+      totalSalesAmount: sales._sum.total ?? 0,
+      mostSoldProduct: {
+        ...mostSoldProductData,
+        amount: mostSoldProduct?._sum.amount ?? 0,
+      },
+    };
+  }),
+  salesByProduct: publicProcedure.query(async ({ ctx }) => {
+    const allProducts = await ctx.prisma.product.findMany();
+    const productMap = new Map(
+      allProducts.map((product) => [product.id, product])
+    );
     const salesByProductAndPrice = await ctx.prisma.productSale.groupBy({
       by: ["productId", "price"],
       _sum: {
@@ -95,35 +126,24 @@ export const saleRouter = createTRPCRouter({
       product: productMap.get(sale.productId),
     }));
 
-    const salesByProduct = salesByProductWithTotalPrice.reduce((acc, sale) => {
-      const product = acc.find((p) => p.productId === sale.productId);
-      if (product) {
-        product.amount += sale._sum.amount ?? 0;
-        product.totalPrice += sale.totalPrice;
-      } else {
-        acc.push(sale);
-      }
-      return acc;
-    }, [] as typeof salesByProductWithTotalPrice);
+    const salesByProduct = salesByProductWithTotalPrice
+      .reduce((acc, sale) => {
+        const product = acc.find((p) => p.productId === sale.productId);
+        if (product) {
+          product.amount += sale._sum.amount ?? 0;
+          product.totalPrice += sale.totalPrice;
+        } else {
+          acc.push(sale);
+        }
+        return acc;
+      }, [] as typeof salesByProductWithTotalPrice)
+      .sort((a, b) => b.totalPrice - a.totalPrice);
 
-    const mostSoldProduct = salesByProduct.reduce((acc, sale) => {
-      if (sale.amount > acc.amount) {
-        return sale;
-      }
-      return acc;
-    })?.product;
-
-    return {
-      totalSold: productSales._sum.amount ?? 0,
-      totalSales: sales._count ?? 0,
-      totalSalesAmount: sales._sum.total ?? 0,
-      mostSoldProduct,
-      salesByProduct: salesByProduct.map((sale) => ({
-        productId: sale.productId,
-        amount: sale._sum.amount ?? 0,
-        totalPrice: sale.totalPrice,
-        product: sale.product,
-      })),
-    };
+    return salesByProduct.map((sale) => ({
+      ...sale.product,
+      productId: sale.productId,
+      amount: sale._sum.amount ?? 0,
+      totalPrice: sale.totalPrice,
+    }));
   }),
 });
