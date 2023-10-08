@@ -3,6 +3,7 @@ import { DataTable } from "~/components/ui/dataTable";
 import UpdateProduct from "~/components/features/products/updateProduct";
 import { formatCurrency } from "~/lib/utils";
 import { type RouterOutputs, api } from "~/utils/api";
+import { Kbd } from "~/components/ui/kbd";
 
 type Product = RouterOutputs["product"]["getAll"][0];
 
@@ -22,7 +23,11 @@ const columns: ColumnDef<Product>[] = [
   },
   {
     header: "Hotkey",
-    cell: ({ row }) => row.original.hotkey ?? "-",
+    cell: ({ row }) => (
+      <Kbd className="w-fit" disabled={!Boolean(row.original.hotkey)}>
+        {row.original.hotkey ?? "𝕏"}
+      </Kbd>
+    ),
   },
   {
     header: "Edit",
