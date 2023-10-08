@@ -23,7 +23,10 @@ export default function ProductCard({
   amount,
 }: ProductCardProps) {
   return (
-    <Card className="transition-all hover:shadow-lg">
+    <Card
+      className="focus:ring-red transition-all hover:shadow-lg active:outline-none active:ring-2"
+      id={`p-${product.id}`}
+    >
       <CardHeader className="flex flex-row items-center justify-between">
         <div className="space-y-1">
           <CardTitle className="text-xl">{product.name}</CardTitle>

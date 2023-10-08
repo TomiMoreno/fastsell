@@ -7,7 +7,7 @@ const kbdVariants = cva(
   {
     variants: {
       disabled: {
-        true: "top-[1px] shadow-[0_1px_0_0.05px_hsl(var(--foreground)_/_0.1)] cursor-not-allowed",
+        true: "top-[1px] shadow-[0_1px_0_0.05px_hsl(var(--foreground)_/_0.1)] cursor-not-allowed opacity-50 ",
         false: "top-[-1px] shadow-[0_2px_0_1px_hsl(var(--foreground)_/_0.1)]",
       },
     },

@@ -25,7 +25,7 @@ const columns: ColumnDef<Product>[] = [
     header: "Hotkey",
     cell: ({ row }) => (
       <Kbd className="w-fit" disabled={!Boolean(row.original.hotkey)}>
-        {row.original.hotkey ?? "𝕏"}
+        {row.original.hotkey ?? "_"}
       </Kbd>
     ),
   },
