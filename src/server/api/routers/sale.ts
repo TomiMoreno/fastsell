@@ -130,7 +130,7 @@ export const saleRouter = createTRPCRouter({
       .reduce((acc, sale) => {
         const product = acc.find((p) => p.productId === sale.productId);
         if (product) {
-          product.amount += sale._sum.amount ?? 0;
+          product.amount += sale.amount ?? 0;
           product.totalPrice += sale.totalPrice;
         } else {
           acc.push(sale);
@@ -142,7 +142,7 @@ export const saleRouter = createTRPCRouter({
     return salesByProduct.map((sale) => ({
       ...sale.product,
       productId: sale.productId,
-      amount: sale._sum.amount ?? 0,
+      amount: sale.amount ?? 0,
       totalPrice: sale.totalPrice,
     }));
   }),
