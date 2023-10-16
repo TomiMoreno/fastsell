@@ -5,6 +5,7 @@ import Head from "next/head";
 import { Toaster } from "~/components/ui/toaster";
 import Header from "~/components/ui/header";
 import { ThemeProvider } from "~/components/theme/theme-provider";
+import { appWithTranslation } from "next-i18next";
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
@@ -30,4 +31,4 @@ const MyApp: AppType = ({ Component, pageProps }) => {
   );
 };
 
-export default api.withTRPC(MyApp);
+export default api.withTRPC(appWithTranslation(MyApp));

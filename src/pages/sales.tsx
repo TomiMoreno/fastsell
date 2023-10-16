@@ -1,3 +1,4 @@
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import SalesDashboard from "~/components/features/sales/dashboard";
 import SalesTable from "~/components/features/sales/salesTable";
 
@@ -11,4 +12,12 @@ export default function Sales() {
       <SalesTable />
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ["common"])),
+    },
+  };
 }

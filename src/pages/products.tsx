@@ -1,3 +1,4 @@
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import CreateProduct from "~/components/features/products/createProduct";
 import ProductTable from "~/components/features/products/productTable";
 
@@ -11,4 +12,12 @@ export default function Products() {
       <ProductTable />
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ["common"])),
+    },
+  };
 }

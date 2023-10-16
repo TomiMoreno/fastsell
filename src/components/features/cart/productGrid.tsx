@@ -20,7 +20,7 @@ function ProductGrid() {
   const { toast } = useToast();
   const { data: products } = api.product.getAll.useQuery();
   const context = api.useContext();
-  const { mutateAsync, isLoading } = api.sale.create.useMutation({
+  const { mutateAsync: buyProducts, isLoading } = api.sale.create.useMutation({
     onSuccess: () => {
       void context.product.getAll.invalidate();
       reset();
@@ -30,12 +30,12 @@ function ProductGrid() {
     useCart();
 
   const handleBuy = useCallback(async () => {
-    await mutateAsync({ productMap: items });
+    await buyProducts({ productMap: items });
     toast({
       title: "Compra realizada",
     });
     setSearch("");
-  }, [items, mutateAsync, toast]);
+  }, [items, buyProducts, toast]);
 
   const filteredProducts: Product[] =
     products?.filter((product) =>
