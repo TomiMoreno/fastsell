@@ -73,7 +73,7 @@ const SalesDashboard: React.FC = () => {
           </p>
         </CardContent>
       </Card>
-      <Card className="col-span-full">
+      <Card className="col-span-full print:hidden">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
             Ventas por producto
