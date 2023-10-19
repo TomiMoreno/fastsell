@@ -10,7 +10,7 @@ const SalesDashboard: React.FC = () => {
   if (isLoading) return <p>Cargando...</p>;
   if (!data) return <p>Error</p>;
 
-  const { totalSales, totalSalesAmount, totalSold, mostSoldProduct } = data;
+  const { numberOfSales, totalSales, productsSold, mostSoldProduct } = data;
 
   return (
     <div className="grid w-full break-after-page gap-4 px-4 md:grid-cols-2 lg:grid-cols-4">
@@ -20,9 +20,7 @@ const SalesDashboard: React.FC = () => {
           <DollarSign />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">
-            {formatCurrency(totalSalesAmount)}
-          </div>
+          <div className="text-2xl font-bold">{formatCurrency(totalSales)}</div>
           <p className="text-xs text-muted-foreground">
             Total de ventas en caja
           </p>
@@ -34,7 +32,7 @@ const SalesDashboard: React.FC = () => {
           <ShoppingBag />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{totalSales}</div>
+          <div className="text-2xl font-bold">{numberOfSales}</div>
           <p className="text-xs text-muted-foreground">Ventas en caja</p>
         </CardContent>
       </Card>
@@ -46,7 +44,7 @@ const SalesDashboard: React.FC = () => {
           <ShoppingCart />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{totalSold}</div>
+          <div className="text-2xl font-bold">{productsSold}</div>
           <p className="text-xs text-muted-foreground">
             Cantidad de productos vendidos
           </p>

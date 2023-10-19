@@ -5,7 +5,7 @@ import { type RouterOutputs, api } from "~/utils/api";
 import { Button } from "~/components/ui/button";
 import { ChevronsUpDown } from "lucide-react";
 
-type Product = RouterOutputs["sale"]["salesByProduct"][0];
+type Product = RouterOutputs["sale"]["dashboard"]["salesByProduct"][number];
 
 const columns: ColumnDef<Product>[] = [
   {
@@ -63,7 +63,8 @@ const columns: ColumnDef<Product>[] = [
 ];
 
 export default function SalesTable() {
-  const { data, isLoading } = api.sale.salesByProduct.useQuery();
+  const { data: { salesByProduct: data } = {}, isLoading } =
+    api.sale.dashboard.useQuery();
   return (
     <div className="container mx-auto flex flex-col gap-5 py-10">
       <div className="flex flex-row items-center justify-between">
