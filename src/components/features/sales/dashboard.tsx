@@ -3,6 +3,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { formatCurrency } from "~/lib/utils";
 import { api } from "~/utils/api";
+import { DonutChart } from "@tremor/react";
 
 const SalesDashboard: React.FC = () => {
   const { data, isLoading } = api.sale.dashboard.useQuery();
@@ -10,7 +11,13 @@ const SalesDashboard: React.FC = () => {
   if (isLoading) return <p>Cargando...</p>;
   if (!data) return <p>Error</p>;
 
-  const { numberOfSales, totalSales, productsSold, mostSoldProduct } = data;
+  const {
+    numberOfSales,
+    totalSales,
+    productsSold,
+    mostSoldProduct,
+    salesByProduct,
+  } = data;
 
   return (
     <div className="grid w-full break-after-page gap-4 px-4 md:grid-cols-2 lg:grid-cols-4">
@@ -64,6 +71,23 @@ const SalesDashboard: React.FC = () => {
           <p className="text-xs text-muted-foreground">
             {mostSoldProduct?.amount || 0} ventas
           </p>
+        </CardContent>
+      </Card>
+      <Card className="col-span-full">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">
+            Ventas por producto
+          </CardTitle>
+          <DollarSign />
+        </CardHeader>
+        <CardContent>
+          <DonutChart
+            className="mt-6"
+            data={salesByProduct}
+            category="totalPrice"
+            index="name"
+            valueFormatter={formatCurrency}
+          />
         </CardContent>
       </Card>
     </div>
