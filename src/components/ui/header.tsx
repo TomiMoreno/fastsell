@@ -13,7 +13,8 @@ import {
 import { Button } from "./button";
 import { useState } from "react";
 import { Menu } from "lucide-react";
-
+import LanguageSwitcher from "./languageSwitcher";
+import { useTranslation } from "react-i18next";
 const routes = [
   {
     name: "Carrito",
@@ -33,13 +34,17 @@ function Header() {
   return (
     <header className="flex items-center justify-between border-b border-foreground/10 bg-background p-4 print:hidden">
       <MainNav />
-      <ModeToggle />
+      <div className="flex items-center justify-between space-x-3">
+        <LanguageSwitcher />
+        <ModeToggle />
+      </div>
     </header>
   );
 }
 
 export function MainNav() {
   const pathname = usePathname();
+  const t = useTranslation("common");
 
   return (
     <div className="mr-4 flex">

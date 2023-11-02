@@ -1,0 +1,13 @@
+{
+  "title": "FastSell",
+  "description": "Vende tus productos de forma rápida y sencilla",
+  "manageProducts": "Administra tus productos",
+  "createSale": "Crea una venta",
+  "cart": "Carrito",
+  "products": "Productos",
+  "sales": "Ventas",
+  "loading": "Cargando...",
+  "english": "Inglés",
+  "spanish": "Español",
+  "language": "Idioma"
+}
