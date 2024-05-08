@@ -4,6 +4,7 @@ import UpdateProduct from "~/components/features/products/updateProduct";
 import { formatCurrency } from "~/lib/utils";
 import { type RouterOutputs, api } from "~/utils/api";
 import { Kbd } from "~/components/ui/kbd";
+import DeleteProduct from "./deleteProduct";
 
 type Product = RouterOutputs["product"]["getAll"][0];
 
@@ -30,7 +31,7 @@ const columns: ColumnDef<Product>[] = [
     ),
   },
   {
-    header: "Edit",
+    header: "Editar",
     cell: ({ row }) => (
       <UpdateProduct
         product={{
@@ -38,6 +39,10 @@ const columns: ColumnDef<Product>[] = [
         }}
       />
     ),
+  },
+  {
+    header: "Borrar",
+    cell: ({ row }) => <DeleteProduct product={row.original} />,
   },
 ];
 

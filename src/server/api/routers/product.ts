@@ -1,3 +1,4 @@
+import { z } from "zod";
 import {
   createProductSchema,
   updateProductSchema,
@@ -23,15 +24,21 @@ export const productRouter = createTRPCRouter({
     }),
   update: publicProcedure
     .input(updateProductSchema)
-    .mutation(async ({ ctx, input }) => {
-      const product = await ctx.prisma.product.update({
+    .mutation(({ ctx, input }) =>
+      ctx.prisma.product.update({
         where: {
           id: input.id,
         },
         data: {
           ...input,
         },
-      });
-      return product;
-    }),
+      })
+    ),
+  delete: publicProcedure.input(z.string()).mutation(({ ctx, input }) => {
+    return ctx.prisma.product.delete({
+      where: {
+        id: input,
+      },
+    });
+  }),
 });
