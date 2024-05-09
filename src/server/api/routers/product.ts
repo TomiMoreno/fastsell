@@ -5,7 +5,7 @@ import {
   updateProductSchema,
 } from "~/lib/schemas/product";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { productsTable } from "~/server/schema";
+import { productsTable } from "~/server/db/schema";
 
 export const productRouter = createTRPCRouter({
   getAll: publicProcedure.query(({ ctx }) => {

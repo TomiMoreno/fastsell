@@ -1,7 +1,11 @@
 import { count, eq, sum } from "drizzle-orm";
 import { createSaleSchema } from "~/lib/schemas/product";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { productSalesTable, productsTable, salesTable } from "~/server/schema";
+import {
+  productSalesTable,
+  productsTable,
+  salesTable,
+} from "~/server/db/schema";
 
 export const saleRouter = createTRPCRouter({
   getAll: publicProcedure.query(({ ctx }) => {

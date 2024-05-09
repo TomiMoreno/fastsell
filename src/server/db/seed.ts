@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { db } from "./db";
+import { db } from ".";
 import { productSalesTable, productsTable, salesTable } from "./schema";
 import { eq } from "drizzle-orm";
 
