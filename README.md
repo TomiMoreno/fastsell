@@ -22,4 +22,5 @@ I created this project because I had to sell products on a family business and I
 2. Install dependencies with `npm install`
 3. Create a `.env` file based on `.env.example`
 4. Push DB changes with `npm run db:push`
-5. Run the application with `npm run dev`
+5. Seed DB with `npm run db:seed`
+6. Run the application with `npm run dev`
