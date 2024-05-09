@@ -15,7 +15,7 @@ const customTimestamp = customType<{
   driverData: string;
   config: { fsp: number };
 }>({
-  dataType(config) {
+  dataType() {
     return `timestamp`;
   },
   fromDriver(value: string): Date {

@@ -7,8 +7,8 @@ export const env = createEnv({
    * isn't built with invalid env vars.
    */
   server: {
-    TURSO_AUTH_TOKEN: z.string().min(1),
-    TURSO_DATABASE_URL: z.string().url(),
+    TURSO_AUTH_TOKEN: z.string(),
+    TURSO_DATABASE_URL: z.string().min(1),
     NODE_ENV: z.enum(["development", "test", "production"]),
   },
 
