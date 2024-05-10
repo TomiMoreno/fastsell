@@ -1,6 +1,5 @@
 "use client";
 
-/* eslint-disable @typescript-eslint/no-misused-promises */
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { useForm } from "react-hook-form";
@@ -28,41 +27,43 @@ export default function Login() {
   });
 
   return (
-    <div className="mt-[60px]">
-      <div className="flex flex-col gap-7 text-center">
-        <h1 className="text-3xl font-extrabold tracking-tight text-secondary-foreground sm:text-[5rem]">
-          FastSell
-        </h1>
-        <p className="text-xl text-secondary-foreground">
-          Logueate para continuar!
-        </p>
+    <main className="flex grow flex-col items-center justify-start bg-background">
+      <div className="mt-[60px]">
+        <div className="flex flex-col gap-7 text-center">
+          <h1 className="text-3xl font-extrabold tracking-tight text-secondary-foreground sm:text-[5rem]">
+            FastSell
+          </h1>
+          <p className="text-xl text-secondary-foreground">
+            Logueate para continuar!
+          </p>
 
-        <form onSubmit={handleSubmit((data) => console.log(data))}>
-          <div className="flex flex-col gap-2">
-            <Input
-              type="email"
-              placeholder="Email"
-              required
-              {...register("email")}
-            />
-            <Input
-              type="password"
-              placeholder="Password"
-              required
-              {...register("password")}
-            />
-            <Button variant={"accent"} type="submit">
-              Iniciar sesión
-            </Button>
+          <form onSubmit={void handleSubmit((data) => console.log(data))}>
+            <div className="flex flex-col gap-2">
+              <Input
+                type="email"
+                placeholder="Email"
+                required
+                {...register("email")}
+              />
+              <Input
+                type="password"
+                placeholder="Password"
+                required
+                {...register("password")}
+              />
+              <Button variant={"accent"} type="submit">
+                Iniciar sesión
+              </Button>
+            </div>
+          </form>
+          <div className="text-sm font-medium text-destructive">
+            {JSON.stringify(errors.email?.message)}
           </div>
-        </form>
-        <div className="text-sm font-medium text-destructive">
-          {JSON.stringify(errors.email?.message)}
-        </div>
-        <div className="text-sm font-medium text-destructive">
-          {JSON.stringify(errors.password?.message)}
+          <div className="text-sm font-medium text-destructive">
+            {JSON.stringify(errors.password?.message)}
+          </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
