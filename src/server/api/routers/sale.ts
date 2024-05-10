@@ -1,25 +1,29 @@
+import { count, eq, sum } from "drizzle-orm";
 import { createSaleSchema } from "~/lib/schemas/product";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import {
+  productSalesTable,
+  productsTable,
+  salesTable,
+} from "~/server/db/schema";
 
 export const saleRouter = createTRPCRouter({
   getAll: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.product.findMany();
+    return ctx.db.select().from(salesTable).all();
   }),
   create: publicProcedure
     .input(createSaleSchema)
     .mutation(async ({ ctx, input }) => {
-      const sale = await ctx.prisma.sale.create({
-        data: {
-          total: 0,
-        },
-      });
+      // First we create a sale to store ProductSales in it.
+      const sale = await ctx.db
+        .insert(salesTable)
+        .values({ total: 0 })
+        .returning()
+        .then((res) => res.at(0));
+      if (!sale) throw new Error("Sale not created");
       const productsIds = [...input.productMap.keys()];
-      const products = await ctx.prisma.product.findMany({
-        where: {
-          id: {
-            in: productsIds,
-          },
-        },
+      const products = await ctx.db.query.productsTable.findMany({
+        where: ({ id }, { inArray }) => inArray(id, productsIds),
       });
       const productsMap = products.reduce((acc, product) => {
         acc[product.id] = product;
@@ -35,57 +39,57 @@ export const saleRouter = createTRPCRouter({
         const totalPrice = product.price * amount;
         total += totalPrice;
         // if (product.stock < amount) throw new Error("Not enough stock");
-        await ctx.prisma.product.update({
-          where: {
-            id: productId,
-          },
-          data: {
+        // TODO: parallelize this
+        await ctx.db
+          .update(productsTable)
+          .set({
             stock: product.stock - amount,
-          },
-        });
-        await ctx.prisma.productSale.create({
-          data: {
-            price: product.price,
-            productId: product.id,
-            saleId: sale.id,
-            amount,
-          },
+          })
+          .where(eq(productsTable.id, productId));
+
+        await ctx.db.insert(productSalesTable).values({
+          price: product.price,
+          productId: product.id,
+          saleId: sale.id,
+          amount,
         });
       }
 
-      await ctx.prisma.sale.update({
-        where: {
-          id: sale.id,
-        },
-        data: {
+      await ctx.db
+        .update(salesTable)
+        .set({
           total,
-        },
-      });
+        })
+        .where(eq(salesTable.id, sale.id));
+
       return sale;
     }),
   dashboard: publicProcedure.query(async ({ ctx }) => {
-    const allProducts = await ctx.prisma.product.findMany();
+    const allProducts = await ctx.db.select().from(productsTable).all();
     const productMap = new Map(
       allProducts.map((product) => [product.id, product])
     );
-    const salesByProductAndPrice = await ctx.prisma.productSale.groupBy({
-      by: ["productId", "price"],
-      _sum: {
-        amount: true,
-      },
-    });
+    const salesByProductAndPrice = await ctx.db
+      .select({
+        amount: sum(productSalesTable.amount).mapWith(Number),
+        price: productSalesTable.price,
+        productId: productSalesTable.productId,
+      })
+      .from(productSalesTable)
+      .groupBy(productSalesTable.productId, productSalesTable.price);
 
-    const { _count: numberOfSales = 0 } = await ctx.prisma.sale.aggregate({
-      _count: true,
-      _sum: {
-        total: true,
-      },
-    });
+    const { numberOfSales } = (await ctx.db
+      .select({
+        total: sum(salesTable.total).mapWith(Number),
+        numberOfSales: count(),
+      })
+      .from(salesTable)
+      .then((res) => res.at(0))) || { total: 0, numberOfSales: 0 };
 
     const salesByProductWithTotalPrice = salesByProductAndPrice.map((sale) => ({
       ...sale,
-      totalPrice: (sale._sum.amount ?? 0) * sale.price,
-      amount: sale._sum.amount ?? 0,
+      totalPrice: (sale.amount ?? 0) * sale.price,
+      amount: sale.amount ?? 0,
       product: productMap.get(sale.productId),
     }));
 
