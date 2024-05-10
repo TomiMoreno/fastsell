@@ -5,7 +5,16 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Github, Mail } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
 
 const schema = z.object({
   email: z.string().email("Ingresa un Email correcto"),
@@ -22,70 +31,116 @@ const schema = z.object({
     }),
 });
 export default function Register() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<z.infer<typeof schema>>({
+  const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
+    defaultValues: {
+      name: "",
+      email: "",
+      lastName: "",
+      password: "",
+      repeatPassword: "",
+    },
   });
 
+  function onSubmit(values: z.infer<typeof schema>) {
+    console.log(values);
+  }
+
   return (
-    <div className="container relative hidden h-screen flex-col items-center justify-center p-0 md:grid lg:max-w-none lg:grid-cols-2">
-      <div className="flex h-screen w-full items-center self-center bg-gray-800 px-[25%]  align-middle">
-        <div className="flex flex-col ">
-          <h1 className="text-3xl font-extrabold tracking-tight text-secondary-foreground sm:text-[5rem] ">
-            FastSell
-          </h1>
-        </div>
+    <div className="container relative hidden h-screen flex-col items-center justify-center bg-black p-0 md:grid lg:max-w-none lg:grid-cols-2">
+      <div className="flex h-screen  items-center bg-zinc-900">
+        <h1 className="px-[25%] text-3xl font-extrabold tracking-tight text-secondary-foreground sm:text-[5rem] ">
+          FastSell
+        </h1>
       </div>
-      <div className="mt-[10%] flex flex-col gap-8 bg-black px-3 text-center">
-        <form onSubmit={handleSubmit((data) => console.log(data))}>
-          <div className="flex flex-col gap-2">
-            <p className="mt-7 text-xl text-secondary-foreground">
-              Create an account
-            </p>
-            <Input
-              type="text"
-              placeholder="Name"
-              required
-              {...register("name")}
-            />
-            <Input
-              type="text"
-              placeholder="Last Name"
-              required
-              {...register("lastName")}
-            />
-            <Input
-              type="email"
-              placeholder="Email"
-              required
-              {...register("email")}
-            />
-            <Input
-              type="password"
-              placeholder="Password"
-              required
-              {...register("password")}
-            />
-            <Input
-              type="password"
-              placeholder="Repeat your password"
-              required
-              {...register("repeatPassword")}
-            />
-            <Button variant={"accent"} type="submit">
-              Registrate
-            </Button>
-          </div>
-        </form>
-        <div className="text-sm font-medium text-destructive">
-          {JSON.stringify(errors.email?.message)}
+      <div className="mt-[10%] flex w-full flex-col  gap-8 bg-black px-3 text-left ">
+        <div className="flex w-full flex-col px-[20%]">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Name" required {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Last Name" required {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Email" required {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Password"
+                        required
+                        type="password"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                name="repeatPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Repeat your password</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Repeat your password"
+                        required
+                        type="password"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-center">
+                <Button type="submit" variant={"accent"}>
+                  Registrate
+                </Button>
+              </div>
+            </form>
+          </Form>
         </div>
-        <div className="text-sm font-medium text-destructive">
-          {JSON.stringify(errors.password?.message)}
-        </div>
+        <a href="/login">
+          <p className="text-center text-xl text-secondary-foreground">
+            Ya tienes cuenta?
+          </p>
+        </a>
       </div>
     </div>
   );
