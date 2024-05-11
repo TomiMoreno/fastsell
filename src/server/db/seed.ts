@@ -68,6 +68,14 @@ const seedSales = async (
   });
 };
 
+export const unSeed = async () => {
+  await db.transaction(async (tx) => {
+    await tx.delete(productSalesTable);
+    await tx.delete(salesTable);
+    await tx.delete(productsTable);
+  });
+};
+
 export const seed = async () => {
   const products = await seedProduts(40);
   await seedSales(products, { min: 50, max: 100 });

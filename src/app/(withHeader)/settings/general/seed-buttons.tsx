@@ -133,7 +133,7 @@ function ClearDataForm({ onClose }: { onClose: () => void }) {
       </InputOTP>
       <DialogFooter className="sm:justify-end">
         <DialogClose asChild>
-          <Button type="button" variant="accent">
+          <Button type="button" variant="secondary">
             Cancelar
           </Button>
         </DialogClose>

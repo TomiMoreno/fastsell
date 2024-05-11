@@ -1,10 +1,9 @@
 import { TRPCError } from "@trpc/server";
-import { sql } from "drizzle-orm";
 import { env } from "process";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
-import { seed } from "~/server/db/seed";
+import { seed, unSeed } from "~/server/db/seed";
 
 export const seedRouter = createTRPCRouter({
   addRandomData: publicProcedure.mutation(() => {
@@ -12,18 +11,10 @@ export const seedRouter = createTRPCRouter({
       throw new TRPCError({ code: "BAD_REQUEST" });
     return seed();
   }),
-  clearCurrentData: publicProcedure.mutation(async ({ ctx }) => {
+  clearCurrentData: publicProcedure.mutation(async () => {
     if (env.NODE_ENV === "production")
       throw new TRPCError({ code: "BAD_REQUEST" });
 
-    await ctx.db.transaction(async (tx) => {
-      const tables = await tx
-        .select({ name: sql`name`.mapWith(String) })
-        .from(sql`sqlite_master`)
-        .where(sql`type = 'table' AND name like 'fastsell_%'`);
-      await Promise.all(
-        tables.map(({ name }) => tx.run(sql.raw(`delete from ${name}`))),
-      );
-    });
+    return unSeed();
   }),
 });
