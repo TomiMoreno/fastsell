@@ -1,3 +1,4 @@
+"use client";
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import {
   Sheet,
@@ -8,7 +9,7 @@ import {
   SheetTitle,
 } from "~/components/ui/sheet";
 import { useForm } from "react-hook-form";
-import { api } from "~/utils/api";
+import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -56,8 +57,8 @@ const ProductForm = ({
     defaultValues: product,
     mode: "onBlur",
   });
-  const context = api.useContext();
-  const { mutateAsync, isLoading } = api.product.update.useMutation({
+  const context = api.useUtils();
+  const { mutateAsync, isPending } = api.product.update.useMutation({
     onSuccess: () => {
       void context.product.getAll.invalidate();
     },
@@ -94,7 +95,7 @@ const ProductForm = ({
           type="number"
         />
         <Field name="hotkey" label="Hotkey" control={form.control} />
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" disabled={isPending}>
           Actualizar!
         </Button>
       </form>

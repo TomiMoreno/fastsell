@@ -1,3 +1,4 @@
+"use client";
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import React, {
   useState,
@@ -7,22 +8,22 @@ import React, {
   useCallback,
 } from "react";
 import { Button } from "~/components/ui/button";
-import { api } from "~/utils/api";
 import ProductCard from "./productCard";
 import { useCart } from "~/lib/store";
 import { useToast } from "~/components/ui/use-toast";
 import { Input } from "~/components/ui/input";
 import { type Product } from "~/lib/schemas/product";
+import { api } from "~/trpc/react";
 
 function ProductGrid() {
   const [search, setSearch] = useState("");
   const ref = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { data: products } = api.product.getAll.useQuery();
-  const context = api.useContext();
-  const { mutateAsync, isLoading } = api.sale.create.useMutation({
+  const utils = api.useUtils();
+  const { mutateAsync, isPending } = api.sale.create.useMutation({
     onSuccess: () => {
-      void context.product.getAll.invalidate();
+      void utils.product.getAll.invalidate();
       reset();
     },
   });
@@ -39,23 +40,28 @@ function ProductGrid() {
 
   const filteredProducts: Product[] =
     products?.filter((product) =>
-      product.name.toLowerCase().includes(search.toLowerCase())
+      product.name.toLowerCase().includes(search.toLowerCase()),
     ) ?? [];
 
   // Add hotkeys to add products to cart
   useEffect(() => {
     const hotkeys =
-      products?.reduce((acc, product) => {
-        if (product.hotkey) {
-          acc[product.hotkey] = {
-            add: () => addToCart(product),
-            remove: () => removeFromCart(product),
-            product,
-          };
-        }
-        return acc;
-      }, {} as Record<string, { add: () => void; remove: () => void; product: Product }>) ??
-      {};
+      products?.reduce(
+        (acc, product) => {
+          if (product.hotkey) {
+            acc[product.hotkey] = {
+              add: () => addToCart(product),
+              remove: () => removeFromCart(product),
+              product,
+            };
+          }
+          return acc;
+        },
+        {} as Record<
+          string,
+          { add: () => void; remove: () => void; product: Product }
+        >,
+      ) ?? {};
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (ref.current?.contains(e.target as Node)) return;
@@ -84,7 +90,7 @@ function ProductGrid() {
     };
   }, [products, addToCart, removeFromCart, handleBuy, reset]);
 
-  if (isLoading) {
+  if (isPending) {
     return <div>Loading...</div>;
   }
   return (

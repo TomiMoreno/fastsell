@@ -1,9 +1,10 @@
+"use client";
 import { type ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "~/components/ui/dataTable";
 import { formatCurrency } from "~/lib/utils";
-import { type RouterOutputs, api } from "~/utils/api";
 import { Button } from "~/components/ui/button";
 import { ChevronsUpDown } from "lucide-react";
+import { type RouterOutputs, api } from "~/trpc/react";
 
 type Product = RouterOutputs["sale"]["dashboard"]["salesByProduct"][number];
 
