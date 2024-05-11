@@ -25,10 +25,13 @@ export const saleRouter = createTRPCRouter({
       const products = await ctx.db.query.productsTable.findMany({
         where: ({ id }, { inArray }) => inArray(id, productsIds),
       });
-      const productsMap = products.reduce((acc, product) => {
-        acc[product.id] = product;
-        return acc;
-      }, {} as Record<string, (typeof products)[0]>);
+      const productsMap = products.reduce(
+        (acc, product) => {
+          acc[product.id] = product;
+          return acc;
+        },
+        {} as Record<string, (typeof products)[0]>,
+      );
       let total = 0;
       for (const productId of input.productMap.keys()) {
         const product = productsMap[productId];
@@ -67,7 +70,7 @@ export const saleRouter = createTRPCRouter({
   dashboard: publicProcedure.query(async ({ ctx }) => {
     const allProducts = await ctx.db.select().from(productsTable).all();
     const productMap = new Map(
-      allProducts.map((product) => [product.id, product])
+      allProducts.map((product) => [product.id, product]),
     );
     const salesByProductAndPrice = await ctx.db
       .select({
@@ -84,7 +87,7 @@ export const saleRouter = createTRPCRouter({
         numberOfSales: count(),
       })
       .from(salesTable)
-      .then((res) => res.at(0))) || { total: 0, numberOfSales: 0 };
+      .then((res) => res.at(0))) ?? { total: 0, numberOfSales: 0 };
 
     const salesByProductWithTotalPrice = salesByProductAndPrice.map((sale) => ({
       ...sale,
@@ -94,16 +97,19 @@ export const saleRouter = createTRPCRouter({
     }));
 
     const salesByProduct = salesByProductWithTotalPrice
-      .reduce((acc, sale) => {
-        const product = acc.find((p) => p.productId === sale.productId);
-        if (product) {
-          product.amount += sale.amount ?? 0;
-          product.totalPrice += sale.totalPrice;
-        } else {
-          acc.push(sale);
-        }
-        return acc;
-      }, [] as typeof salesByProductWithTotalPrice)
+      .reduce(
+        (acc, sale) => {
+          const product = acc.find((p) => p.productId === sale.productId);
+          if (product) {
+            product.amount += sale.amount ?? 0;
+            product.totalPrice += sale.totalPrice;
+          } else {
+            acc.push(sale);
+          }
+          return acc;
+        },
+        [] as typeof salesByProductWithTotalPrice,
+      )
       .sort((a, b) => b.totalPrice - a.totalPrice)
       .map((sale) => ({
         ...sale.product,
@@ -115,12 +121,12 @@ export const saleRouter = createTRPCRouter({
     const mostSoldProduct = salesByProduct[0];
     const productsSold = salesByProduct.reduce(
       (acc, product) => acc + (product.amount ?? 0),
-      0
+      0,
     );
 
     const totalSales = salesByProduct.reduce(
       (acc, product) => acc + (product.totalPrice ?? 0),
-      0
+      0,
     );
 
     return {
