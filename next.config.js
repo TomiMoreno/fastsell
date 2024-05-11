@@ -16,6 +16,14 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  // allow all
+  images: {
+    remotePatterns: [
+      {
+        hostname: '*'
+      }
+    ],
+  }
 };
 
 export default config;
