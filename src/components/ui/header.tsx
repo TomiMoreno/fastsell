@@ -28,6 +28,10 @@ const routes = [
     name: "Ventas",
     path: "/sales",
   },
+  {
+    name: "Configuración",
+    path: "/settings/general",
+  },
 ];
 
 function Header() {
@@ -56,7 +60,9 @@ export function MainNav() {
             href={route.path}
             className={cn(
               "hidden transition-colors hover:text-foreground/80 sm:block",
-              pathname === route.path ? "text-foreground" : "text-foreground/60"
+              pathname === route.path
+                ? "text-foreground"
+                : "text-foreground/60",
             )}
           >
             {route.name}
@@ -102,7 +108,7 @@ function MobileNav() {
                 "text-lg transition-colors hover:text-foreground/80",
                 pathname === route.path
                   ? "text-foreground"
-                  : "text-foreground/60"
+                  : "text-foreground/60",
               )}
               onClick={() => setOpen(false)}
             >
