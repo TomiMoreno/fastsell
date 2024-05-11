@@ -1,22 +1,34 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-misused-promises */
-import React, {
-  useState,
-  type ChangeEvent,
-  useRef,
-  useEffect,
-  useCallback,
-} from "react";
+import { LayoutDashboardIcon } from "lucide-react";
+import { useCallback, useRef, useState, type ChangeEvent } from "react";
+import { useLocalStorage } from "usehooks-ts";
 import { Button } from "~/components/ui/button";
-import ProductCard from "./productCard";
-import { useCart } from "~/lib/store";
-import { useToast } from "~/components/ui/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import { Input } from "~/components/ui/input";
+import { useToast } from "~/components/ui/use-toast";
 import { type Product } from "~/lib/schemas/product";
+import { useCart } from "~/lib/store";
 import { api } from "~/trpc/react";
+import ProductCard from "./productCard";
+import useHotkeys from "./useHotkeys";
 
 function ProductGrid() {
   const [search, setSearch] = useState("");
+  const [numberOfCols, setNumberOfCols] = useLocalStorage<number>(
+    "numberOfCols",
+    1,
+    {
+      initializeWithValue: false,
+    }
+  );
   const ref = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { data: products } = api.product.getAll.useQuery();
@@ -40,62 +52,54 @@ function ProductGrid() {
 
   const filteredProducts: Product[] =
     products?.filter((product) =>
-      product.name.toLowerCase().includes(search.toLowerCase()),
+      product.name.toLowerCase().includes(search.toLowerCase())
     ) ?? [];
 
-  // Add hotkeys to add products to cart
-  useEffect(() => {
-    const hotkeys =
-      products?.reduce(
-        (acc, product) => {
-          if (product.hotkey) {
-            acc[product.hotkey] = {
-              add: () => addToCart(product),
-              remove: () => removeFromCart(product),
-              product,
-            };
-          }
-          return acc;
-        },
-        {} as Record<
-          string,
-          { add: () => void; remove: () => void; product: Product }
-        >,
-      ) ?? {};
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (ref.current?.contains(e.target as Node)) return;
-      const keyPressed = e.key.toLocaleLowerCase();
-      if (keyPressed === "f1") {
-        e.preventDefault();
-        handleBuy().catch(console.error);
-        return;
-      }
-
-      const key = hotkeys[keyPressed];
-      if (!key) return;
-      if (e.shiftKey) key.remove();
-      else key.add();
-      const elementToScroll = document.getElementById(`p-${key.product.id}`);
-      elementToScroll?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [products, addToCart, removeFromCart, handleBuy, reset]);
+  useHotkeys({
+    ref,
+    handleBuy,
+    activateHotkeys: true,
+  });
 
   if (isPending) {
     return <div>Loading...</div>;
   }
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold">Productos</h1>
+      <div className="flex w-full items-center justify-between gap-4">
+        <h1 className="text-3xl font-bold">Productos</h1>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon" title="Change layout">
+              <LayoutDashboardIcon strokeWidth={1} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuLabel>Cantidad de columnas</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuCheckboxItem
+              checked={numberOfCols === 1}
+              onClick={() => setNumberOfCols(1)}
+            >
+              1 Columna
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={numberOfCols === 2}
+              onClick={() => setNumberOfCols(2)}
+              className="hidden sm:block"
+            >
+              2 Columnas
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={numberOfCols === 3}
+              onClick={() => setNumberOfCols(3)}
+              className="hidden lg:block"
+            >
+              3 Columnas
+            </DropdownMenuCheckboxItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
       <Input
         value={search}
         onChange={(e) => {
@@ -105,7 +109,12 @@ function ProductGrid() {
         className="my-4"
         placeholder="Buscar producto"
       />
-      <div className="max-w-xxl mx-auto grid grid-cols-1 gap-4">
+      <div
+        className="max-w-xxl mx-auto grid gap-4"
+        style={{
+          gridTemplateColumns: `repeat(${numberOfCols}, 1fr)`,
+        }}
+      >
         {filteredProducts.map((product) => (
           <ProductCard
             key={product.id}
@@ -113,8 +122,8 @@ function ProductGrid() {
             plusOne={() => addToCart(product)}
             minusOne={() => removeFromCart(product)}
             handleChange={(e: ChangeEvent<HTMLInputElement>) => {
-              const value = parseInt(e.target.value);
-              changeAmount(product, value);
+              const value = Math.max(parseInt(e.target.value), 0);
+              changeAmount(product, value || 0);
             }}
             amount={items.get(product.id)?.amount ?? 0}
           />
@@ -124,7 +133,7 @@ function ProductGrid() {
           className="fixed bottom-2 left-8 right-8 col-span-full "
           onClick={() => handleBuy()}
         >
-          Comprar carrito, Total {total}
+          Comprar carrito, Total {total.toFixed(0)}
         </Button>
       </div>
     </div>

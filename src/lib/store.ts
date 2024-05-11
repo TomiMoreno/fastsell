@@ -6,9 +6,11 @@ interface CartState {
   addToCart: (product: Product, amount?: number) => void;
   removeFromCart: (product: Product, amount?: number) => void;
   changeAmount: (product: Product, amount: number) => void;
-  total: number;
   buy: () => void;
   reset: () => void;
+  computed: {
+    total: number;
+  }
 }
 
 interface ProductsState {
@@ -18,9 +20,24 @@ interface ProductsState {
   editProduct: (product: Product) => void;
 }
 
-export const useCart = create<CartState>()((set) => ({
+const calculateTotal = (items: CartState["items"]) =>
+  [...items.values()].reduce((acc, { product, amount }) => acc + product.price * amount, 0);
+
+export const useCart = create<CartState>()((set, get) => ({
   items: new Map(),
-  total: 0,
+  changeAmount: (product, amount) =>
+    set((state) => {
+      const currentMap = new Map(state.items);
+      if (amount <= 0) currentMap.delete(product.id);
+      else
+        currentMap.set(product.id, {
+          product,
+          amount,
+        });
+      return {
+        items: currentMap,
+      };
+    }),
   addToCart: (product, amount = 1) =>
     set((state) => {
       const currentMap = new Map(state.items);
@@ -29,26 +46,8 @@ export const useCart = create<CartState>()((set) => ({
         product,
         amount: currentAmount + amount,
       });
-      const price = product.price;
       return {
         items: currentMap,
-        total: state.total + price * amount,
-      };
-    }),
-  changeAmount: (product, amount) =>
-    set((state) => {
-      const currentMap = new Map(state.items);
-      const currentAmount = currentMap.get(product.id)?.amount ?? 0;
-      if (amount <= 0) currentMap.delete(product.id);
-      else
-        currentMap.set(product.id, {
-          product,
-          amount,
-        });
-      const differenceInAmount = amount - currentAmount;
-      return {
-        items: currentMap,
-        total: state.total + product.price * differenceInAmount,
       };
     }),
   removeFromCart: (product, amount = 1) =>
@@ -61,11 +60,15 @@ export const useCart = create<CartState>()((set) => ({
         currentMap.set(product.id, { product, amount: currentAmount - amount });
       return {
         items: currentMap,
-        total: Math.max(0, state.total - product.price * amount),
       };
     }),
   buy: () => set(() => ({ items: new Map() })),
-  reset: () => set(() => ({ items: new Map(), total: 0 })),
+  reset: () => set(() => ({ items: new Map()})),
+  computed: {
+    get total() {
+      return calculateTotal(get().items);
+    }
+  }
 }));
 
 export const useProducts = create<ProductsState>()((set) => ({
