@@ -16,7 +16,7 @@ const seedProduts = (amount = 35) => {
           stock: faker.number.int({ min: -5, max: 565 }),
         },
       ];
-    })
+    }),
   );
 
   return db
@@ -33,13 +33,13 @@ const randomSubset = <T>(arr: T[]) => {
 
 const seedSales = async (
   products: (typeof productsTable.$inferSelect)[],
-  config: Parameters<typeof faker.number.int>[0] = { min: 50, max: 75 }
+  config: Parameters<typeof faker.number.int>[0] = { min: 50, max: 75 },
 ) => {
   return db.transaction(async (tx) => {
     const sales = await tx
       .insert(salesTable)
       .values(
-        new Array(faker.number.int(config)).fill(0).map(() => ({ total: 0 }))
+        new Array(faker.number.int(config)).fill(0).map(() => ({ total: 0 })),
       )
       .returning({ id: salesTable.id });
     await Promise.all(
@@ -53,7 +53,7 @@ const seedSales = async (
         }));
         const total = data.reduce(
           (prev, curr) => prev + curr.amount * curr.price,
-          0
+          0,
         );
 
         return Promise.all([
@@ -63,19 +63,12 @@ const seedSales = async (
             .set({ total })
             .where(eq(salesTable.id, sale.id)),
         ]);
-      })
+      }),
     );
   });
 };
 
-const main = async () => {
-  console.log("Running seeds");
-  console.log("Seeding products");
+export const seed = async () => {
   const products = await seedProduts(40);
-  console.log("Products seeded ⚡");
-  console.log("Seeding sales");
   await seedSales(products, { min: 50, max: 100 });
-  console.log("Sales seeded ⚡");
 };
-
-void main();
