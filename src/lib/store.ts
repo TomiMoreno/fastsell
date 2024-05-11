@@ -6,7 +6,6 @@ interface CartState {
   addToCart: (product: Product, amount?: number) => void;
   removeFromCart: (product: Product, amount?: number) => void;
   changeAmount: (product: Product, amount: number) => void;
-  buy: () => void;
   reset: () => void;
   computed: {
     total: number;
@@ -38,31 +37,16 @@ export const useCart = create<CartState>()((set, get) => ({
         items: currentMap,
       };
     }),
-  addToCart: (product, amount = 1) =>
-    set((state) => {
-      const currentMap = new Map(state.items);
-      const currentAmount = currentMap.get(product.id)?.amount ?? 0;
-      currentMap.set(product.id, {
-        product,
-        amount: currentAmount + amount,
-      });
-      return {
-        items: currentMap,
-      };
-    }),
-  removeFromCart: (product, amount = 1) =>
-    set((state) => {
-      const currentMap = new Map(state.items);
-      const currentAmount = currentMap.get(product.id)?.amount ?? 0;
-      if (currentAmount === 0) return state;
-      if (currentAmount <= amount) currentMap.delete(product.id);
-      else
-        currentMap.set(product.id, { product, amount: currentAmount - amount });
-      return {
-        items: currentMap,
-      };
-    }),
-  buy: () => set(() => ({ items: new Map() })),
+  addToCart: (product, amount = 1) => {
+    const { changeAmount, items} = get()
+    const newAmount = (items.get(product.id)?.amount ?? 0) + amount;
+    return changeAmount(product, newAmount);
+  },
+  removeFromCart: (product, amount = 1) =>{
+    const { changeAmount, items} = get()
+    const newAmount = Math.max((items.get(product.id)?.amount ?? 0) - amount, 0);
+    return changeAmount(product, newAmount);
+  },
   reset: () => set(() => ({ items: new Map()})),
   computed: {
     get total() {

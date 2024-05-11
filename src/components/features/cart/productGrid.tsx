@@ -39,8 +39,14 @@ function ProductGrid() {
       reset();
     },
   });
-  const { addToCart, changeAmount, removeFromCart, reset, items, total } =
-    useCart();
+  const {
+    addToCart,
+    changeAmount,
+    removeFromCart,
+    reset,
+    items,
+    computed: { total },
+  } = useCart();
 
   const handleBuy = useCallback(async () => {
     await mutateAsync({ productMap: items });
