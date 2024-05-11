@@ -4,11 +4,17 @@ import {
   customType,
   integer,
   real,
-  sqliteTable,
+  sqliteTableCreator,
   text,
 } from "drizzle-orm/sqlite-core";
 
-const createTableName = (name: string) => `fastsell_${name}`;
+/**
+ * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
+ * database instance for multiple projects.
+ *
+ * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
+ */
+export const createTable = sqliteTableCreator((name) => `fastsell_${name}`);
 
 const customTimestamp = customType<{
   data: Date;
@@ -23,7 +29,7 @@ const customTimestamp = customType<{
   },
 });
 
-export const productsTable = sqliteTable(createTableName("products"), {
+export const productsTable = createTable("products", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => createId()),
@@ -43,7 +49,7 @@ export const productsTable = sqliteTable(createTableName("products"), {
 
 customType;
 
-export const salesTable = sqliteTable(createTableName("sales"), {
+export const salesTable = createTable("sales", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => createId()),
@@ -57,7 +63,7 @@ export const salesTable = sqliteTable(createTableName("sales"), {
   total: real("total").notNull(),
 });
 
-export const productSalesTable = sqliteTable(createTableName("product_sales"), {
+export const productSalesTable = createTable("product_sales", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => createId()),

@@ -1,6 +1,7 @@
+"use client";
 import { TrashIcon } from "lucide-react";
 import { useToast } from "~/components/ui/use-toast";
-import { api, type RouterOutputs } from "~/utils/api";
+
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -11,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
+import { api, type RouterOutputs } from "~/trpc/react";
 
 export default function DeleteProduct({
   product,
@@ -18,15 +20,15 @@ export default function DeleteProduct({
   product: RouterOutputs["product"]["getAll"][number];
 }) {
   const { toast } = useToast();
-  const context = api.useContext();
-  const { mutate: deleteMutation, isLoading } = api.product.delete.useMutation({
+  const utils = api.useUtils();
+  const { mutate: deleteMutation, isPending } = api.product.delete.useMutation({
     onSuccess: () => {
       toast({
         title: "Producto eliminado",
       });
     },
     onSettled: () => {
-      void context.product.getAll.invalidate();
+      void utils.product.getAll.invalidate();
     },
   });
 
@@ -37,7 +39,7 @@ export default function DeleteProduct({
           variant="destructive"
           size="icon"
           title="Delete product"
-          disabled={isLoading}
+          disabled={isPending}
         >
           <TrashIcon size={16} strokeWidth={2} absoluteStrokeWidth />
         </Button>

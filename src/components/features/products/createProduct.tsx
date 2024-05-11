@@ -1,3 +1,4 @@
+"use client";
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import {
   Sheet,
@@ -8,7 +9,6 @@ import {
   SheetTitle,
 } from "~/components/ui/sheet";
 import { useForm } from "react-hook-form";
-import { api } from "~/utils/api";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,6 +20,7 @@ import { toast } from "~/components/ui/use-toast";
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import Field from "~/components/ui/field";
+import { api } from "~/trpc/react";
 
 function CreateProduct() {
   const [open, setOpen] = useState(false);
@@ -54,10 +55,10 @@ const ProductForm = ({ closeSheet }: { closeSheet: () => void }) => {
     },
     mode: "onBlur",
   });
-  const context = api.useContext();
-  const { mutateAsync, isLoading } = api.product.create.useMutation({
+  const utils = api.useUtils();
+  const { mutateAsync, isPending } = api.product.create.useMutation({
     onSuccess: () => {
-      void context.product.getAll.invalidate();
+      void utils.product.getAll.invalidate();
     },
   });
   async function onSubmit(values: CreateProductSchema) {
@@ -91,7 +92,7 @@ const ProductForm = ({ closeSheet }: { closeSheet: () => void }) => {
           type="number"
         />
         <Field name="hotkey" label="Hotkey" control={form.control} />
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" disabled={isPending}>
           Agregar!
         </Button>
       </form>

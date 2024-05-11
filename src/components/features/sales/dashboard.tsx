@@ -1,8 +1,9 @@
+"use client";
 import { DollarSign, ShoppingBag, ShoppingCart, Trophy } from "lucide-react";
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { formatCurrency } from "~/lib/utils";
-import { api } from "~/utils/api";
+import { api } from "~/trpc/react";
 import { DonutChart } from "@tremor/react";
 
 const SalesDashboard: React.FC = () => {
@@ -66,10 +67,10 @@ const SalesDashboard: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {mostSoldProduct?.name || "Ninguno"}
+            {mostSoldProduct?.name ?? "Ninguno"}
           </div>
           <p className="text-xs text-muted-foreground">
-            {mostSoldProduct?.amount || 0} ventas
+            {mostSoldProduct?.amount ?? 0} ventas
           </p>
         </CardContent>
       </Card>
