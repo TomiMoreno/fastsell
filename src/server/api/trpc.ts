@@ -6,11 +6,13 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import { initTRPC } from "@trpc/server";
+import { TRPCError, initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
+import { env } from "~/env";
 
 import { db } from "~/server/db";
+import { validateRequest } from "../auth";
 
 /**
  * 1. CONTEXT
@@ -18,17 +20,56 @@ import { db } from "~/server/db";
  * This section defines the "contexts" that are available in the backend API.
  *
  * These allow you to access things when processing a request, like the database, the session, etc.
+ */
+
+interface CreateContextOptions {
+  headers: Headers;
+}
+
+export const getServerSession = async () => {
+  const validated = await validateRequest();
+  const session = validated.session
+    ? {
+        ...validated.session,
+        user: validated.user,
+      }
+    : null;
+
+  return session;
+};
+
+/**
+ * This helper generates the "internals" for a tRPC context. If you need to use it, you can export
+ * it from here.
  *
- * This helper generates the "internals" for a tRPC context. The API handler and RSC clients each
- * wrap this and provides the required context.
+ * Examples of things you may need it for:
+ * - testing, so we don't have to mock Next.js' req/res
+ * - tRPC's `createSSGHelpers`, where we don't have req/res
  *
- * @see https://trpc.io/docs/server/context
+ * @see https://create.t3.gg/en/usage/trpc#-serverapitrpcts
+ */
+export const createInnerTRPCContext = async (opts: CreateContextOptions) => {
+  const session = await getServerSession();
+
+  return {
+    session,
+    headers: opts.headers,
+    db,
+  };
+};
+
+/**
+ * This is the actual context you will use in your router. It will be used to process every request
+ * that goes through your tRPC endpoint.
+ *
+ * @see https://trpc.io/docs/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-  return {
-    db,
-    ...opts,
-  };
+  // Fetch stuff that depends on the request
+
+  return await createInnerTRPCContext({
+    headers: opts.headers,
+  });
 };
 
 /**
@@ -81,3 +122,41 @@ export const createTRPCRouter = t.router;
  * are logged in.
  */
 export const publicProcedure = t.procedure;
+
+/** Reusable middleware that enforces server is in dev mode before running the procedure. */
+const enforceIsDevMode = t.middleware(({ ctx, next }) => {
+  if (env.NODE_ENV !== "development") {
+    throw new TRPCError({ code: "BAD_REQUEST" });
+  }
+  return next({ ctx });
+});
+
+/**
+ * Protected (just dev mode) procedure
+ *
+ * this query or mutation just works in dev mode
+ */
+export const devProcedure = t.procedure.use(enforceIsDevMode);
+
+/** Reusable middleware that enforces users are logged in before running the procedure. */
+const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
+  if (!ctx.session) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  return next({
+    ctx: {
+      // infers the `session` as non-nullable
+      session: { ...ctx.session, user: ctx.session.user },
+    },
+  });
+});
+
+/**
+ * Protected (authenticated) procedure
+ *
+ * If you want a query or mutation to ONLY be accessible to logged in users, use this. It verifies
+ * the session is valid and guarantees `ctx.session.user` is not null.
+ *
+ * @see https://trpc.io/docs/procedures
+ */
+export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
