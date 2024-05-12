@@ -64,7 +64,6 @@ const ProductForm = ({
     },
   });
   async function onSubmit(values: UpdateProductSchema) {
-    console.log(values);
     const createdValues = await mutateAsync(values);
     closeSheet();
     toast({

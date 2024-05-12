@@ -13,6 +13,8 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
+import { api } from "~/trpc/react";
+import { useRouter } from "next/navigation";
 
 const schema = z.object({
   email: z.string().email("Ingresa un Email correcto"),
@@ -29,6 +31,7 @@ const schema = z.object({
     }),
 });
 export default function Register() {
+  const router = useRouter();
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -40,8 +43,14 @@ export default function Register() {
     },
   });
 
+  const register = api.auth.signUp.useMutation({
+    onSuccess() {
+      router.push("/");
+    },
+  });
+
   function onSubmit(values: z.infer<typeof schema>) {
-    console.log(values);
+    register.mutate(values);
   }
 
   return (
@@ -56,7 +65,7 @@ export default function Register() {
           <div className="flex w-full flex-col px-[20%]">
             <Form {...form}>
               <form
-                onSubmit={void form.handleSubmit(onSubmit)}
+                onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-4"
               >
                 <FormField

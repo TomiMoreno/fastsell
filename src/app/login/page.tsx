@@ -5,6 +5,8 @@ import { Input } from "~/components/ui/input";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { api } from "~/trpc/react";
+import { useRouter } from "next/navigation";
 
 const schema = z.object({
   email: z.string().email("Ingresa un Email correcto"),
@@ -18,6 +20,12 @@ const schema = z.object({
     }),
 });
 export default function Login() {
+  const router = useRouter();
+  const signIn = api.auth.signIn.useMutation({
+    onSuccess() {
+      router.push("/");
+    },
+  });
   const {
     register,
     handleSubmit,
@@ -37,7 +45,7 @@ export default function Login() {
             Logueate para continuar!
           </p>
 
-          <form onSubmit={void handleSubmit((data) => console.log(data))}>
+          <form onSubmit={handleSubmit((data) => signIn.mutate(data))}>
             <div className="flex flex-col gap-2">
               <Input
                 type="email"
