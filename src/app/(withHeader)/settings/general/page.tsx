@@ -15,7 +15,12 @@ import { Input } from "~/components/ui/input";
 import { env } from "~/env.js";
 import SeedButtons from "./seed-buttons";
 
-export default function Page() {
+import { validateRequest } from "~/server/auth";
+import { redirect } from "next/navigation";
+
+export default async function Page() {
+  const { session } = await validateRequest();
+  if (!session) redirect("/login");
   return (
     <div className="flex grow flex-col gap-6">
       <Card>
@@ -34,12 +39,13 @@ export default function Page() {
           <Button>Guardar</Button>
         </CardFooter>
       </Card>
-      {env.NODE_ENV !== "production" && (
+      {env.NODE_ENV === "development" && (
         <Card>
           <CardHeader>
             <CardTitle>Seeders</CardTitle>
             <CardDescription>
-              Agregar contenido aleatorio a la db
+              Modifica el contenido en la base de datos, agrega pero no elimina
+              usuarios.
             </CardDescription>
           </CardHeader>
           <CardFooter className="flex gap-4 border-t border-t-foreground/10 px-6 py-4">

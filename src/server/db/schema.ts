@@ -1,5 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   customType,
   integer,
@@ -47,8 +47,6 @@ export const productsTable = createTable("products", {
   hotkey: text("hotkey"),
 });
 
-customType;
-
 export const salesTable = createTable("sales", {
   id: text("id")
     .primaryKey()
@@ -83,3 +81,61 @@ export const productSalesTable = createTable("product_sales", {
     .references(() => salesTable.id)
     .notNull(),
 });
+
+export const usersTable = createTable("user", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  name: text("name").notNull(),
+  lastName: text("lastName").notNull(),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(),
+  createdAt: customTimestamp("createdAt")
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .notNull(),
+  updatedAt: customTimestamp("updatedAt")
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .notNull()
+    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
+});
+
+export const sessionsTable = createTable("session", {
+  id: text("id").notNull().primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  expiresAt: integer("expires_at").notNull(),
+});
+
+export const productSalesRelations = relations(
+  productSalesTable,
+  ({ one }) => ({
+    sale: one(salesTable, {
+      fields: [productSalesTable.saleId],
+      references: [salesTable.id],
+    }),
+    product: one(productsTable, {
+      fields: [productSalesTable.productId],
+      references: [productsTable.id],
+    }),
+  }),
+);
+
+export const salesRelations = relations(salesTable, ({ many }) => ({
+  productSales: many(productSalesTable),
+}));
+
+export const productsRelations = relations(productsTable, ({ many }) => ({
+  productSales: many(productSalesTable),
+}));
+
+export const sessionsRelations = relations(sessionsTable, ({ one }) => ({
+  user: one(usersTable, {
+    fields: [sessionsTable.userId],
+    references: [usersTable.id],
+  }),
+}));
+
+export const usersRelations = relations(usersTable, ({ many }) => ({
+  sessions: many(sessionsTable),
+}));

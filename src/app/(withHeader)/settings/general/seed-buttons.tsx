@@ -85,7 +85,7 @@ function ClearDataForm({ onClose }: { onClose: () => void }) {
     onError: () => {
       toast({
         variant: "destructive",
-        title: "No se pudo generar contenido aleatorio",
+        title: "No se pudo eliminar el contenido",
       });
     },
     onSettled: () => {
@@ -99,6 +99,8 @@ function ClearDataForm({ onClose }: { onClose: () => void }) {
       ? "text-primary"
       : "text-destructive";
   };
+
+  const isHalfEnded = code.slice(0, 3) === randomCode.current.slice(0, 3);
 
   return (
     <div className="space-y-5">
@@ -124,7 +126,7 @@ function ClearDataForm({ onClose }: { onClose: () => void }) {
           <InputOTPSlot className={getColor(1)} index={1} />
           <InputOTPSlot className={getColor(2)} index={2} />
         </InputOTPGroup>
-        <InputOTPSeparator />
+        <InputOTPSeparator className={isHalfEnded ? "text-primary" : ""} />
         <InputOTPGroup>
           <InputOTPSlot className={getColor(3)} index={3} />
           <InputOTPSlot className={getColor(4)} index={4} />

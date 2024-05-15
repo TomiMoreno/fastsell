@@ -1,6 +1,11 @@
 import { faker } from "@faker-js/faker";
 import { db } from ".";
-import { productSalesTable, productsTable, salesTable } from "./schema";
+import {
+  productSalesTable,
+  productsTable,
+  salesTable,
+  usersTable,
+} from "./schema";
 import { eq } from "drizzle-orm";
 
 const seedProduts = (amount = 35) => {
@@ -11,7 +16,7 @@ const seedProduts = (amount = 35) => {
         name,
         {
           name,
-          image: faker.image.url(),
+          image: faker.image.urlLoremFlickr({ category: name }),
           price: faker.number.float({ min: 500, max: 5000, fractionDigits: 2 }),
           stock: faker.number.int({ min: -5, max: 565 }),
         },
@@ -68,6 +73,21 @@ const seedSales = async (
   });
 };
 
+const seedUsers = () => {
+  const emails = new Set(
+    new Array(25).fill(0).map(() => faker.internet.email()),
+  );
+
+  return db.insert(usersTable).values(
+    [...emails].map((email) => ({
+      email,
+      name: faker.person.firstName(),
+      lastName: faker.person.lastName(),
+      password: faker.internet.password(),
+    })),
+  );
+};
+
 export const unSeed = async () => {
   await db.transaction(async (tx) => {
     await tx.delete(productSalesTable);
@@ -77,6 +97,7 @@ export const unSeed = async () => {
 };
 
 export const seed = async () => {
+  await seedUsers();
   const products = await seedProduts(40);
   await seedSales(products, { min: 50, max: 100 });
 };

@@ -34,11 +34,14 @@ const routes = [
   },
 ];
 
-function Header() {
+function Header({ fullName }: { fullName?: string }) {
   return (
     <header className="flex items-center justify-between border-b border-foreground/10 bg-background p-4 print:hidden">
       <MainNav />
-      <ModeToggle />
+      <div className="flex items-center gap-3">
+        <h3 className="text-foreground">{fullName}</h3>
+        <ModeToggle />
+      </div>
     </header>
   );
 }

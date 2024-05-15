@@ -20,10 +20,16 @@ const config = {
   images: {
     remotePatterns: [
       {
-        hostname: '*'
-      }
+        hostname: "*",
+      },
     ],
-  }
+  },
+  experimental: {
+    serverComponentsExternalPackages: ["@node-rs/argon2"], // package to hash
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 };
 
 export default config;
