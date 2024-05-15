@@ -17,7 +17,7 @@ export default function RegisterPage() {
           <LoginForm />
           <div className="mt-4 text-center text-sm">
             Ya tienes una cuenta?{" "}
-            <Link href="/register" className="underline">
+            <Link href="/login" className="underline">
               Inicia sesión
             </Link>
           </div>
