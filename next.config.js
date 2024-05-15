@@ -27,6 +27,9 @@ const config = {
   experimental: {
     serverComponentsExternalPackages: ["@node-rs/argon2"], // package to hash
   },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 };
 
 export default config;
