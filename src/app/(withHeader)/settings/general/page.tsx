@@ -1,7 +1,3 @@
-export const metadata = {
-  title: "FastSell - Settings - General",
-  description: "General settings Page",
-};
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -12,11 +8,14 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
-import { env } from "~/env.js";
-import SeedButtons from "./seed-buttons";
 
 import { validateRequest } from "~/server/auth";
 import { redirect } from "next/navigation";
+
+export const metadata = {
+  title: "FastSell - Settings - General",
+  description: "General settings Page",
+};
 
 export default async function Page() {
   const { session } = await validateRequest();
@@ -39,20 +38,6 @@ export default async function Page() {
           <Button>Guardar</Button>
         </CardFooter>
       </Card>
-      {env.NODE_ENV === "development" && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Seeders</CardTitle>
-            <CardDescription>
-              Modifica el contenido en la base de datos, agrega pero no elimina
-              usuarios.
-            </CardDescription>
-          </CardHeader>
-          <CardFooter className="flex gap-4 border-t border-t-foreground/10 px-6 py-4">
-            <SeedButtons />
-          </CardFooter>
-        </Card>
-      )}
     </div>
   );
 }
