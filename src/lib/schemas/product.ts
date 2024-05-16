@@ -10,6 +10,7 @@ export const createProductSchema = z.object({
   name: z.string().min(3),
   price: z.coerce.number(),
   stock: z.coerce.number(),
+  base64: z.string().optional(),
   hotkey,
 });
 
@@ -44,6 +45,6 @@ export const createSaleSchema = z.object({
     z.object({
       amount: z.number(),
       product,
-    })
+    }),
   ),
 });

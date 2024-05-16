@@ -6,29 +6,32 @@ import { api } from "~/trpc/react";
 export default function useHotkeys({
   ref,
   handleBuy,
-  activateHotkeys = false,
 }: {
   ref: React.RefObject<HTMLElement>;
   handleBuy: () => void;
-  activateHotkeys?: boolean;
 }) {
-  const { data: products  } = api.product.getAll.useQuery();
+  const { data: products } = api.product.getAll.useQuery();
   const { addToCart, removeFromCart, reset } = useCart();
 
   // Add hotkeys to add products to cart
   useEffect(() => {
     const hotkeys =
-      products?.reduce((acc, product) => {
-        if (product.hotkey) {
-          acc[product.hotkey] = {
-            add: () => addToCart(product),
-            remove: () => removeFromCart(product),
-            product,
-          };
-        }
-        return acc;
-      }, {} as Record<string, { add: () => void; remove: () => void; product: Product }>) ??
-      {};
+      products?.reduce(
+        (acc, product) => {
+          if (product.hotkey) {
+            acc[product.hotkey] = {
+              add: () => addToCart(product),
+              remove: () => removeFromCart(product),
+              product,
+            };
+          }
+          return acc;
+        },
+        {} as Record<
+          string,
+          { add: () => void; remove: () => void; product: Product }
+        >,
+      ) ?? {};
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (ref.current?.contains(e.target as Node)) return;

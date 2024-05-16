@@ -1,5 +1,4 @@
-import { type Control } from "react-hook-form";
-import { type z } from "zod";
+import type { FieldValues, Path, Control } from "react-hook-form";
 import {
   FormControl,
   FormDescription,
@@ -9,25 +8,25 @@ import {
   FormMessage,
 } from "./form";
 import { Input } from "./input";
+import type { ComponentProps } from "react";
 
-interface FieldProps {
-  name: string;
+interface FieldProps<T extends FieldValues> {
+  name: Path<T>;
   label: string;
-  control: Control<z.infer<z.ZodTypeAny>>;
-  type?: string;
+  control: Control<T>;
+  type?: ComponentProps<typeof Input>["type"];
   placeholder?: string;
   description?: string;
 }
 
-export default function Field({
+export default function Field<T extends FieldValues>({
   name,
   label,
   control,
   placeholder,
   description,
   type = "text",
-  ...props
-}: FieldProps) {
+}: FieldProps<T>) {
   return (
     <FormField
       control={control}
@@ -44,7 +43,6 @@ export default function Field({
           <FormMessage />
         </FormItem>
       )}
-      {...props}
     />
   );
 }

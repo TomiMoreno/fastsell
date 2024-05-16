@@ -6,6 +6,9 @@ import {
 } from "~/lib/schemas/product";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { productsTable } from "~/server/db/schema";
+import { TRPCError } from "@trpc/server";
+import { ImageService } from "~/server/services/image";
+import { createId } from "@paralleldrive/cuid2";
 
 export const productRouter = createTRPCRouter({
   getAll: publicProcedure.query(({ ctx }) => {
@@ -13,18 +16,26 @@ export const productRouter = createTRPCRouter({
   }),
   create: publicProcedure
     .input(createProductSchema)
-    .mutation(async ({ ctx, input }) =>
-      ctx.db
+    .mutation(async ({ ctx, input }) => {
+      const id = createId();
+      const image = input.base64
+        ? await ImageService.createFromBase64(input.base64, `product_${id}`)
+        : "";
+      const product = await ctx.db
         .insert(productsTable)
         .values({
+          id,
           name: input.name,
           price: input.price,
           stock: input.stock,
-          image: "https://picsum.photos/200",
+          image,
           hotkey: null,
         })
         .returning()
-    ),
+        .then(([p]) => p);
+      if (!product) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      return product;
+    }),
   update: publicProcedure
     .input(updateProductSchema)
     .mutation(({ ctx, input }) =>
@@ -34,9 +45,10 @@ export const productRouter = createTRPCRouter({
           ...input,
         })
         .where(eq(productsTable.id, input.id))
-        .returning()
+        .returning(),
     ),
-  delete: publicProcedure.input(z.string()).mutation(({ ctx, input }) => {
-    return ctx.db.delete(productsTable).where(eq(productsTable.id, input));
+  delete: publicProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
+    await ctx.db.delete(productsTable).where(eq(productsTable.id, input));
+    await ImageService.deleteImage(`product_${input}`);
   }),
 });
