@@ -10,17 +10,24 @@ import {
 } from "~/components/ui/sheet";
 import { useForm } from "react-hook-form";
 import { Button } from "~/components/ui/button";
-import { Form } from "~/components/ui/form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  type CreateProductSchema,
-  createProductSchema,
-} from "~/lib/schemas/product";
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createProductSchema } from "~/lib/schemas/product";
 import { toast } from "~/components/ui/use-toast";
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import Field from "~/components/ui/field";
 import { api } from "~/trpc/react";
+import { Input } from "~/components/ui/input";
+import { z } from "zod";
+import { fileHelper } from "~/lib/utils";
 
 function CreateProduct() {
   const [open, setOpen] = useState(false);
@@ -45,9 +52,15 @@ function CreateProduct() {
   );
 }
 
+const schema = createProductSchema.merge(
+  z.object({
+    image: z.instanceof(File).optional(),
+  }),
+);
+
 const ProductForm = ({ closeSheet }: { closeSheet: () => void }) => {
-  const form = useForm<CreateProductSchema>({
-    resolver: zodResolver(createProductSchema),
+  const form = useForm<z.infer<typeof schema>>({
+    resolver: zodResolver(schema),
     defaultValues: {
       name: "",
       price: 0,
@@ -61,8 +74,12 @@ const ProductForm = ({ closeSheet }: { closeSheet: () => void }) => {
       void utils.product.getAll.invalidate();
     },
   });
-  async function onSubmit(values: CreateProductSchema) {
-    const createdValues = await mutateAsync(values);
+  async function onSubmit(values: z.infer<typeof schema>) {
+    const base64 = values.image && (await fileHelper.toBase64(values.image));
+    const createdValues = await mutateAsync({
+      ...values,
+      base64,
+    });
     closeSheet();
     toast({
       title: "Producto agregado!",
@@ -75,6 +92,7 @@ const ProductForm = ({ closeSheet }: { closeSheet: () => void }) => {
       ),
     });
   }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -91,6 +109,28 @@ const ProductForm = ({ closeSheet }: { closeSheet: () => void }) => {
           control={form.control}
           type="number"
         />
+        <FormField
+          control={form.control}
+          name="image"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Imagen</FormLabel>
+              <FormControl>
+                <Input
+                  type="file"
+                  {...field}
+                  value={undefined}
+                  onChange={(e) =>
+                    e.target.files?.[0] && field.onChange(e.target.files[0])
+                  }
+                />
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <Field name="hotkey" label="Hotkey" control={form.control} />
         <Button type="submit" disabled={isPending}>
           Agregar!

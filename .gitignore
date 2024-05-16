@@ -45,3 +45,6 @@ generated
 
 # db
 *.db
+
+# local files
+/public/local/*

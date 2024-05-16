@@ -10,6 +10,8 @@ export const env = createEnv({
     TURSO_AUTH_TOKEN: z.string().optional(),
     TURSO_DATABASE_URL: z.string().min(1),
     NODE_ENV: z.enum(["development", "test", "production"]),
+    UPLOADTHING_SECRET: z.string().optional(),
+    UPLOADTHING_APP_ID: z.string().optional(),
   },
 
   /**
@@ -29,6 +31,8 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     TURSO_AUTH_TOKEN: process.env.TURSO_AUTH_TOKEN,
     TURSO_DATABASE_URL: process.env.TURSO_DATABASE_URL,
+    UPLOADTHING_SECRET: process.env.UPLOADTHING_SECRET,
+    UPLOADTHING_APP_ID: process.env.UPLOADTHING_APP_ID,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**
