@@ -1,20 +1,20 @@
+import { createId } from "@paralleldrive/cuid2";
+import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import {
   createProductSchema,
   updateProductSchema,
 } from "~/lib/schemas/product";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { productsTable } from "~/server/db/schema";
-import { TRPCError } from "@trpc/server";
 import { ImageService } from "~/server/services/image";
-import { createId } from "@paralleldrive/cuid2";
 
 export const productRouter = createTRPCRouter({
-  getAll: publicProcedure.query(({ ctx }) => {
+  getAll: protectedProcedure.query(({ ctx }) => {
     return ctx.db.select().from(productsTable).all();
   }),
-  create: publicProcedure
+  create: protectedProcedure
     .input(createProductSchema)
     .mutation(async ({ ctx, input }) => {
       const id = createId();
@@ -36,7 +36,7 @@ export const productRouter = createTRPCRouter({
       if (!product) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       return product;
     }),
-  update: publicProcedure
+  update: protectedProcedure
     .input(updateProductSchema)
     .mutation(({ ctx, input }) =>
       ctx.db
@@ -47,8 +47,10 @@ export const productRouter = createTRPCRouter({
         .where(eq(productsTable.id, input.id))
         .returning(),
     ),
-  delete: publicProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
-    await ctx.db.delete(productsTable).where(eq(productsTable.id, input));
-    await ImageService.deleteImage(`product_${input}`);
-  }),
+  delete: protectedProcedure
+    .input(z.string())
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.delete(productsTable).where(eq(productsTable.id, input));
+      await ImageService.deleteImage(`product_${input}`);
+    }),
 });

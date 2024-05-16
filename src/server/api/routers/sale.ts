@@ -1,6 +1,6 @@
 import { count, eq, sum } from "drizzle-orm";
 import { createSaleSchema } from "~/lib/schemas/product";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
   productSalesTable,
   productsTable,
@@ -8,10 +8,10 @@ import {
 } from "~/server/db/schema";
 
 export const saleRouter = createTRPCRouter({
-  getAll: publicProcedure.query(({ ctx }) => {
+  getAll: protectedProcedure.query(({ ctx }) => {
     return ctx.db.select().from(salesTable).all();
   }),
-  create: publicProcedure
+  create: protectedProcedure
     .input(createSaleSchema)
     .mutation(async ({ ctx, input }) => {
       // First we create a sale to store ProductSales in it.
@@ -67,7 +67,7 @@ export const saleRouter = createTRPCRouter({
 
       return sale;
     }),
-  dashboard: publicProcedure.query(async ({ ctx }) => {
+  dashboard: protectedProcedure.query(async ({ ctx }) => {
     const allProducts = await ctx.db.select().from(productsTable).all();
     const productMap = new Map(
       allProducts.map((product) => [product.id, product]),
