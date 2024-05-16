@@ -40,6 +40,9 @@ export const productsTable = createTable("products", {
     .default(sql`(CURRENT_TIMESTAMP)`)
     .notNull()
     .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
+  // organizationId: text("organization_id")
+  //   .references(() => organizationsTable.id)
+  //   .notNull(),
   name: text("name").notNull(),
   price: real("price").notNull(),
   stock: integer("stock").notNull(),
@@ -51,6 +54,9 @@ export const salesTable = createTable("sales", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => createId()),
+  // organizationId: text("organization_id")
+  //   .references(() => organizationsTable.id)
+  //   .notNull(),
   createdAt: customTimestamp("createdAt")
     .default(sql`(CURRENT_TIMESTAMP)`)
     .notNull(),
@@ -107,6 +113,59 @@ export const sessionsTable = createTable("session", {
   expiresAt: integer("expires_at").notNull(),
 });
 
+export const organizationsTable = createTable("organizations", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  name: text("name").notNull(),
+  logo: text("logo").notNull(),
+  createdAt: customTimestamp("createdAt")
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .notNull(),
+  updatedAt: customTimestamp("updatedAt")
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .notNull()
+    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
+});
+
+export const organizationUsersTable = createTable("organization_users", {
+  userId: text("user_id")
+    .notNull()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  organizationId: text("organization_id")
+    .notNull()
+    .references(() => organizationsTable.id, { onDelete: "cascade" }),
+  role: text("role").notNull(),
+  createdAt: customTimestamp("createdAt")
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .notNull(),
+  updatedAt: customTimestamp("updatedAt")
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .notNull()
+    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
+});
+
+export const organizationsRelations = relations(
+  organizationsTable,
+  ({ many }) => ({
+    organizationUsers: many(organizationUsersTable),
+  }),
+);
+
+export const organizationUsersRelations = relations(
+  organizationUsersTable,
+  ({ one }) => ({
+    user: one(usersTable, {
+      fields: [organizationUsersTable.userId],
+      references: [usersTable.id],
+    }),
+    organization: one(organizationsTable, {
+      fields: [organizationUsersTable.organizationId],
+      references: [organizationsTable.id],
+    }),
+  }),
+);
+
 export const productSalesRelations = relations(
   productSalesTable,
   ({ one }) => ({
@@ -138,4 +197,5 @@ export const sessionsRelations = relations(sessionsTable, ({ one }) => ({
 
 export const usersRelations = relations(usersTable, ({ many }) => ({
   sessions: many(sessionsTable),
+  organizationUsers: many(organizationUsersTable),
 }));
