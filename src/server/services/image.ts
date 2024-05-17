@@ -1,11 +1,8 @@
-import { existsSync, mkdirSync } from "fs";
-import { unlink, writeFile } from "fs/promises";
 import { UTApi } from "uploadthing/server";
 import type { FileEsque } from "uploadthing/types";
 import { env } from "~/env";
 import { fileHelper } from "~/lib/utils";
-
-const defaultImage = "https://picsum.photos/200";
+import LocalFileService from "./localFileService";
 
 const modes = {
   local: "local",
@@ -28,20 +25,12 @@ const remotePath = `https://utfs.io/a/${env.UPLOADTHING_APP_ID}`;
 export class ImageService {
   static mode = mode;
   static baseUrl = this.mode === modes.local ? localPath : remotePath;
-  static fileBaseUrl = `./public${localPath}`;
+  static scope = "things";
 
   static async createFromBase64(base64: string, id: string): Promise<string> {
     try {
       if (this.mode === modes.local) {
-        if (mode === modes.local && !existsSync(this.fileBaseUrl)) {
-          mkdirSync(this.fileBaseUrl, { recursive: true });
-        }
-        const base64Data = base64.replace(/^data:image\/\w+;base64,/, "");
-        const buffer = Buffer.from(base64Data, "base64");
-        const url = `${this.fileBaseUrl}/${id}`;
-        return writeFile(url, buffer)
-          .then((res) => res)
-          .then(() => url);
+        return LocalFileService.createFromBase64(base64, this.scope, id);
       }
       if (utapi) {
         const file = fileHelper.fromBase64(base64, id) as FileEsque;
@@ -51,14 +40,14 @@ export class ImageService {
       throw new Error("Couldn't create image");
     } catch (err) {
       console.log({ err });
-      return defaultImage;
+      return "";
     }
   }
 
   static async deleteImage(id: string): Promise<{ success: boolean }> {
     if (this.mode === modes.local) {
       try {
-        await unlink(`${this.fileBaseUrl}/${id}`);
+        await LocalFileService.delete(this.scope, id);
         return { success: true };
       } catch (err) {
         return { success: false };

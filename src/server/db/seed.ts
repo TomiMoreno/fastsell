@@ -12,6 +12,8 @@ import {
   salesTable,
   usersTable,
 } from "./schema";
+import { eq } from "drizzle-orm";
+import LocalFileService from "../services/localFileService";
 
 const MINIMUM_HASH_PARAMETERS = {
   // recommended minimum parameters
@@ -162,8 +164,7 @@ export const unSeed = async () => {
     await tx.delete(salesTable);
     await tx.delete(productsTable);
     await tx.delete(organizationsTable);
-    if (env.NODE_ENV === "development")
-      rmSync("./public/local", { recursive: true });
+    LocalFileService.clean();
   });
 };
 
