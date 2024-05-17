@@ -8,7 +8,6 @@ export const createOrganizationSchema = z.object({
 export type CreateOrganizationSchema = z.infer<typeof createOrganizationSchema>;
 
 export const updateOrganizationSchema = z.object({
-  id: z.string(),
   name: z.string().min(3).optional(),
   logo: z.string().optional(),
 });
