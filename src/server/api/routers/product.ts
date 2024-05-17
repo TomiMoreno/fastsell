@@ -12,7 +12,9 @@ import { ImageService } from "~/server/services/image";
 
 export const productRouter = createTRPCRouter({
   getAll: protectedProcedure.query(({ ctx }) => {
-    return ctx.db.select().from(productsTable).all();
+    return ctx.db.query.productsTable.findMany({
+      where: (t, { eq }) => eq(t.organizationId, ctx.session.organizationId),
+    });
   }),
   create: protectedProcedure
     .input(createProductSchema)
@@ -30,6 +32,7 @@ export const productRouter = createTRPCRouter({
           stock: input.stock,
           image,
           hotkey: null,
+          organizationId: ctx.session.organizationId,
         })
         .returning()
         .then(([p]) => p);
