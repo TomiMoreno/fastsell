@@ -1,9 +1,8 @@
 import { faker } from "@faker-js/faker";
 import { hash } from "@node-rs/argon2";
 import { eq } from "drizzle-orm";
-import { rmSync } from "fs";
-import { env } from "~/env";
 import { db } from ".";
+import LocalFileService from "../services/localFileService";
 import {
   organizationUsersTable,
   organizationsTable,
@@ -12,8 +11,6 @@ import {
   salesTable,
   usersTable,
 } from "./schema";
-import { eq } from "drizzle-orm";
-import LocalFileService from "../services/localFileService";
 
 const MINIMUM_HASH_PARAMETERS = {
   // recommended minimum parameters
