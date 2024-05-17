@@ -1,9 +1,12 @@
 "use client";
+import { Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { siteConfig } from "~/config/site";
 import { cn } from "~/lib/utils";
 import { ModeToggle } from "../theme/modeToggle";
+import { Button } from "./button";
 import {
   Sheet,
   SheetContent,
@@ -11,9 +14,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "./sheet";
-import { Button } from "./button";
-import { useState } from "react";
-import { Menu } from "lucide-react";
 
 const routes = [
   {
@@ -30,7 +30,7 @@ const routes = [
   },
   {
     name: "Configuración",
-    path: "/settings/general",
+    path: "/settings",
   },
 ];
 
