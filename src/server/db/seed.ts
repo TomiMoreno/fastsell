@@ -7,8 +7,7 @@ import {
   usersTable,
 } from "./schema";
 import { eq } from "drizzle-orm";
-import { env } from "~/env";
-import { rmSync } from "fs";
+import LocalFileService from "../services/localFileService";
 
 const seedProduts = (amount = 35) => {
   const data = new Map<string, typeof productsTable.$inferInsert>(
@@ -95,8 +94,7 @@ export const unSeed = async () => {
     await tx.delete(productSalesTable);
     await tx.delete(salesTable);
     await tx.delete(productsTable);
-    if (env.NODE_ENV === "development")
-      rmSync("./public/local", { recursive: true });
+    LocalFileService.clean();
   });
 };
 
