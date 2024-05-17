@@ -9,12 +9,16 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 
-import { lucia } from "~/server/auth";
-import { db } from "~/server/db";
-import { usersTable } from "~/server/db/schema";
-import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { sql } from "drizzle-orm";
+import { z } from "zod";
+import { lucia } from "~/server/auth";
+import { db } from "~/server/db";
+import {
+  organizationUsersTable,
+  organizationsTable,
+  usersTable,
+} from "~/server/db/schema";
 
 export const MINIMUM_HASH_PARAMETERS = {
   // recommended minimum parameters
@@ -67,9 +71,26 @@ export const authRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
         });
-
+      const newOrganization = await ctx.db
+        .insert(organizationsTable)
+        .values({
+          name: "default",
+          logo: "",
+        })
+        .returning()
+        .then(([organization]) => organization);
+      if (!newOrganization)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create organization",
+        });
+      await ctx.db.insert(organizationUsersTable).values({
+        userId: user.id,
+        organizationId: newOrganization.id,
+        role: "admin",
+      });
       const session = await lucia.createSession(userId, {
-        email: user.email,
+        organizationId: newOrganization.id,
       });
       const sessionCookie = lucia.createSessionCookie(session.id);
       cookies().set(
@@ -110,11 +131,22 @@ export const authRouter = createTRPCRouter({
         });
       }
 
+      const userOrganizations =
+        await ctx.db.query.organizationUsersTable.findMany({
+          where: (t, { eq }) => eq(t.userId, existingUser.id),
+        });
+
+      const organizationId = userOrganizations[0]?.organizationId;
+      if (!organizationId) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "User has no organization",
+        });
+      }
       const session = await lucia.createSession(existingUser.id, {
-        email: existingUser.email,
+        organizationId,
       });
       const sessionCookie = lucia.createSessionCookie(session.id);
-
       cookies().set(
         sessionCookie.name,
         sessionCookie.value,
