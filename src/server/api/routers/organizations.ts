@@ -1,47 +1,62 @@
+import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
-import { z } from "zod";
-import { createOrganizationSchema } from "~/lib/schemas/organizations";
-import { updateProductSchema } from "~/lib/schemas/product";
+import {
+  createOrganizationSchema,
+  updateOrganizationSchema,
+} from "~/lib/schemas/organizations";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { organizationsTable, productsTable } from "~/server/db/schema";
+import { organizationUsersTable, organizationsTable } from "~/server/db/schema";
 
-export const productRouter = createTRPCRouter({
-  getAll: protectedProcedure.query(({ ctx }) => {
-    return ctx.db.query.organizationsTable.findMany({
-      with: {
-        organizationUsers: {
-          where: ({ userId }, { eq }) => eq(userId, ctx.session.user?.id),
-        },
-      },
+export const organizationsRouter = createTRPCRouter({
+  getMyOrganization: protectedProcedure.query(({ ctx }) => {
+    return ctx.db.query.organizationsTable.findFirst({
+      where: (t, { eq }) => eq(t.id, ctx.session?.organizationId),
     });
   }),
   create: protectedProcedure
     .input(createOrganizationSchema)
-    .mutation(async ({ ctx, input }) =>
-      ctx.db
+    .mutation(async ({ ctx, input }) => {
+      const [organization] = await ctx.db
         .insert(organizationsTable)
         .values({
           name: input.name,
           logo: input.logo,
         })
-        .returning(),
-    ),
+        .returning();
+      if (!organization) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Organization not created",
+        });
+      }
+      await ctx.db
+        .insert(organizationUsersTable)
+        .values({
+          userId: ctx.session.user.id,
+          organizationId: organization.id,
+          role: "admin",
+        })
+        .returning();
+    }),
   update: publicProcedure
-    .input(updateProductSchema)
-    .mutation(({ ctx, input }) =>
-      ctx.db
-        .update(productsTable)
+    .input(updateOrganizationSchema)
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.session?.organizationId)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "User has no organization",
+        });
+
+      await ctx.db
+        .update(organizationsTable)
         .set({
           ...input,
         })
-        .where(eq(productsTable.id, input.id))
-        .returning(),
-    ),
-  delete: publicProcedure.input(z.string()).mutation(({ ctx, input }) => {
-    return ctx.db.delete(productsTable).where(eq(productsTable.id, input));
-  }),
+        .where(eq(organizationsTable.id, ctx.session.organizationId))
+        .returning();
+    }),
 });
