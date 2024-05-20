@@ -164,9 +164,9 @@ export const authRouter = createTRPCRouter({
       sessionCookie.attributes,
     );
   }),
-  me: publicProcedure.mutation(async ({ ctx }) => {
-    if (ctx.session === null) return null;
-    const user = await ctx.db.query.usersTable.findFirst({
+  me: publicProcedure.query(async ({ ctx: { session, db } }) => {
+    if (!session) return null;
+    const user = await db.query.usersTable.findFirst({
       extras: {
         fullName:
           sql<string>`${usersTable.name} || ' ' || ${usersTable.lastName}`.as(
@@ -176,9 +176,17 @@ export const authRouter = createTRPCRouter({
       columns: {
         password: false,
       },
-      where: (t, { eq }) => eq(t.id, ctx.session!.userId),
+      where: (t, { eq }) => eq(t.id, session.userId),
     });
 
-    return user;
+    const currentOrganization = await db.query.organizationsTable.findFirst({
+      where: (t, { eq }) => eq(t.id, session.organizationId),
+    });
+
+    if (!user || !currentOrganization) {
+      return null;
+    }
+
+    return { user, organization: currentOrganization };
   }),
 });

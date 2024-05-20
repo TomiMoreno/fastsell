@@ -10,11 +10,12 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { env } from "~/env.js";
-import SeedButtons from "./seed-buttons";
+import SeedButtons from "./_sections/seed-buttons";
 
 import { redirect } from "next/navigation";
 import { validateRequest } from "~/server/auth";
-import MyOrganization from "./my-organization";
+import MyOrganization from "./_sections/my-organization";
+import ThemePreferences from "./_sections/theme-preferences";
 
 export default async function Page() {
   const { session } = await validateRequest();
@@ -22,6 +23,7 @@ export default async function Page() {
   return (
     <div className="flex grow flex-col gap-6">
       <MyOrganization />
+      <ThemePreferences />
       {env.NODE_ENV === "development" && (
         <Card>
           <CardHeader>
