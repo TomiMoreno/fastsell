@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useSelectedLayoutSegment } from "next/navigation";
 import { cn } from "~/lib/utils";
 
-const routes = ["general"];
+const routes = ["general", "organizations"];
 
 export function Sidebar() {
   const layoutSegment = useSelectedLayoutSegment();
@@ -16,7 +16,7 @@ export function Sidebar() {
             href={route}
             className={cn(
               "first-letter:capitalize hover:text-foreground/80",
-              layoutSegment === route && "text-foreground"
+              layoutSegment === route && "text-foreground",
             )}
           >
             {route}

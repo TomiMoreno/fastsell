@@ -33,6 +33,7 @@ const schema = z.object({
 export default function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
+  const ctx = api.useUtils();
   const { mutate, status } = api.auth.signIn.useMutation({
     onSuccess() {
       router.push("/");
@@ -40,6 +41,7 @@ export default function LoginForm() {
         title: "Has iniciado sesión correctamente",
         variant: "default",
       });
+      void ctx.invalidate();
     },
     onError() {
       toast({

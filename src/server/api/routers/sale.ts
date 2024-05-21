@@ -1,6 +1,6 @@
-import { count, eq, sum } from "drizzle-orm";
+import { count, eq, inArray, sum } from "drizzle-orm";
 import { createSaleSchema } from "~/lib/schemas/product";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
   productSalesTable,
   productsTable,
@@ -8,16 +8,16 @@ import {
 } from "~/server/db/schema";
 
 export const saleRouter = createTRPCRouter({
-  getAll: publicProcedure.query(({ ctx }) => {
+  getAll: protectedProcedure.query(({ ctx }) => {
     return ctx.db.select().from(salesTable).all();
   }),
-  create: publicProcedure
+  create: protectedProcedure
     .input(createSaleSchema)
     .mutation(async ({ ctx, input }) => {
       // First we create a sale to store ProductSales in it.
       const sale = await ctx.db
         .insert(salesTable)
-        .values({ total: 0 })
+        .values({ total: 0, organizationId: ctx.session.organizationId })
         .returning()
         .then((res) => res.at(0));
       if (!sale) throw new Error("Sale not created");
@@ -67,8 +67,10 @@ export const saleRouter = createTRPCRouter({
 
       return sale;
     }),
-  dashboard: publicProcedure.query(async ({ ctx }) => {
-    const allProducts = await ctx.db.select().from(productsTable).all();
+  dashboard: protectedProcedure.query(async ({ ctx }) => {
+    const allProducts = await ctx.db.query.productsTable.findMany({
+      where: (t, { eq }) => eq(t.organizationId, ctx.session.organizationId),
+    });
     const productMap = new Map(
       allProducts.map((product) => [product.id, product]),
     );
@@ -79,14 +81,19 @@ export const saleRouter = createTRPCRouter({
         productId: productSalesTable.productId,
       })
       .from(productSalesTable)
-      .groupBy(productSalesTable.productId, productSalesTable.price);
+      .groupBy(productSalesTable.productId, productSalesTable.price)
+      .where(({ productId }) =>
+        inArray(productId, [...allProducts.map((p) => p.id), ""]),
+      );
 
     const { numberOfSales } = (await ctx.db
       .select({
         total: sum(salesTable.total).mapWith(Number),
         numberOfSales: count(),
+        organizationId: salesTable.organizationId,
       })
       .from(salesTable)
+      .where((t) => eq(t.organizationId, ctx.session.organizationId))
       .then((res) => res.at(0))) ?? { total: 0, numberOfSales: 0 };
 
     const salesByProductWithTotalPrice = salesByProductAndPrice.map((sale) => ({

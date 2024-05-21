@@ -1,9 +1,10 @@
-import { Lucia, type Session, type User } from "lucia";
-import { db } from "./db";
 import { DrizzleSQLiteAdapter } from "@lucia-auth/adapter-drizzle";
-import { sessionsTable, usersTable } from "./db/schema";
-import { cache } from "react";
+import { Lucia, type Session, type User } from "lucia";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { cache } from "react";
+import { db } from "./db";
+import { sessionsTable, usersTable } from "./db/schema";
 
 const adapter = new DrizzleSQLiteAdapter(db, sessionsTable, usersTable);
 
@@ -20,17 +21,28 @@ export const lucia = new Lucia(adapter, {
       email: attributes.email,
     };
   },
+  getSessionAttributes(databaseSessionAttributes) {
+    return {
+      // attributes has the type of DatabaseSessionAttributes
+      organizationId: databaseSessionAttributes.organizationId,
+    };
+  },
 });
 
 declare module "lucia" {
   interface Register {
     Lucia: typeof lucia;
     DatabaseUserAttributes: DatabaseUserAttributes;
+    DatabaseSessionAttributes: DatabaseSessionAttributes;
   }
 }
 
 interface DatabaseUserAttributes {
   email: string;
+}
+
+interface DatabaseSessionAttributes {
+  organizationId: string;
 }
 
 export const validateRequest = cache(

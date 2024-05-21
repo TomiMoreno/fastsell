@@ -1,19 +1,18 @@
 "use client";
+import { Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { siteConfig } from "~/config/site";
 import { cn } from "~/lib/utils";
-import { ModeToggle } from "../theme/modeToggle";
+import { Button } from "../../../components/ui/button";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "./sheet";
-import { Button } from "./button";
-import { useState } from "react";
-import { Menu } from "lucide-react";
+} from "../../../components/ui/sheet";
 
 const routes = [
   {
@@ -28,23 +27,7 @@ const routes = [
     name: "Ventas",
     path: "/sales",
   },
-  {
-    name: "Configuración",
-    path: "/settings/general",
-  },
 ];
-
-function Header({ fullName }: { fullName?: string }) {
-  return (
-    <header className="flex items-center justify-between border-b border-foreground/10 bg-background p-4 print:hidden">
-      <MainNav />
-      <div className="flex items-center gap-3">
-        <h3 className="text-foreground">{fullName}</h3>
-        <ModeToggle />
-      </div>
-    </header>
-  );
-}
 
 export function MainNav() {
   const pathname = usePathname();
@@ -123,4 +106,3 @@ function MobileNav() {
     </Sheet>
   );
 }
-export default Header;
