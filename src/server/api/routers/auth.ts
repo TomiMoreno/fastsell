@@ -136,13 +136,29 @@ export const authRouter = createTRPCRouter({
           where: (t, { eq }) => eq(t.userId, existingUser.id),
         });
 
-      const organizationId = userOrganizations[0]?.organizationId;
+      let organizationId = userOrganizations[0]?.organizationId;
       if (!organizationId) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "User has no organization",
+        const newOrganization = await ctx.db
+          .insert(organizationsTable)
+          .values({
+            name: "default",
+            logo: "",
+          })
+          .returning()
+          .then(([organization]) => organization);
+        if (!newOrganization)
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to create organization",
+          });
+        await ctx.db.insert(organizationUsersTable).values({
+          userId: existingUser.id,
+          organizationId: newOrganization.id,
+          role: "admin",
         });
+        organizationId = newOrganization.id;
       }
+
       const session = await lucia.createSession(existingUser.id, {
         organizationId,
       });
