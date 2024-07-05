@@ -31,7 +31,7 @@ export const productRouter = createTRPCRouter({
           price: input.price,
           stock: input.stock,
           image,
-          hotkey: null,
+          hotkey: input.hotkey ?? null,
           organizationId: ctx.session.organizationId,
         })
         .returning()
@@ -41,15 +41,22 @@ export const productRouter = createTRPCRouter({
     }),
   update: protectedProcedure
     .input(updateProductSchema)
-    .mutation(({ ctx, input }) =>
-      ctx.db
+    .mutation(async ({ ctx, input }) => {
+      const image = input.base64
+        ? await ImageService.createFromBase64(
+            input.base64,
+            `product_${input.id}_${Date.now()}`,
+          )
+        : undefined;
+      return ctx.db
         .update(productsTable)
         .set({
           ...input,
+          image,
         })
         .where(eq(productsTable.id, input.id))
-        .returning(),
-    ),
+        .returning();
+    }),
   delete: protectedProcedure
     .input(z.string())
     .mutation(async ({ ctx, input }) => {

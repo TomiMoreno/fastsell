@@ -21,6 +21,7 @@ export const updateProductSchema = z.object({
   name: z.string().min(3),
   price: z.coerce.number(),
   stock: z.coerce.number(),
+  base64: z.string().optional(),
   hotkey,
 });
 

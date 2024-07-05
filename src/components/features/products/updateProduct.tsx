@@ -1,30 +1,47 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-misused-promises */
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Edit } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "~/components/ui/button";
+import Field from "~/components/ui/field";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
 import {
   Sheet,
-  SheetTrigger,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
+  SheetTrigger,
 } from "~/components/ui/sheet";
-import { useForm } from "react-hook-form";
-import { api } from "~/trpc/react";
-import { Button } from "~/components/ui/button";
-import { Form } from "~/components/ui/form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "~/components/ui/use-toast";
 import {
   updateProductSchema,
   type UpdateProductSchema,
 } from "~/lib/schemas/product";
-import { toast } from "~/components/ui/use-toast";
-import { useState } from "react";
-import { Edit } from "lucide-react";
-import Field from "~/components/ui/field";
+import { fileHelper } from "~/lib/utils";
+import { api } from "~/trpc/react";
 
 type UpdateProductProps = {
   product: UpdateProductSchema;
 };
+
+const schema = updateProductSchema.merge(
+  z.object({
+    newImage: z.instanceof(File).optional(),
+  }),
+);
+type UpdateProduct = z.infer<typeof schema>;
 
 function UpdateProduct({ product }: UpdateProductProps) {
   const [open, setOpen] = useState(false);
@@ -52,8 +69,8 @@ const ProductForm = ({
   closeSheet,
   product,
 }: UpdateProductProps & { closeSheet: () => void }) => {
-  const form = useForm<UpdateProductSchema>({
-    resolver: zodResolver(updateProductSchema),
+  const form = useForm<UpdateProduct>({
+    resolver: zodResolver(schema),
     defaultValues: product,
     mode: "onBlur",
   });
@@ -63,8 +80,12 @@ const ProductForm = ({
       void context.product.getAll.invalidate();
     },
   });
-  async function onSubmit(values: UpdateProductSchema) {
-    const createdValues = await mutateAsync(values);
+  async function onSubmit({ newImage, ...values }: UpdateProduct) {
+    const base64 = newImage && (await fileHelper.toBase64(newImage));
+    const createdValues = await mutateAsync({
+      ...values,
+      base64,
+    });
     closeSheet();
     toast({
       title: "Producto actualizado!",
@@ -94,6 +115,29 @@ const ProductForm = ({
           type="number"
         />
         <Field name="hotkey" label="Hotkey" control={form.control} />
+        <FormField
+          control={form.control}
+          name="newImage"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Imagen</FormLabel>
+              <FormControl>
+                <>
+                  <Input
+                    type="file"
+                    {...field}
+                    value={undefined}
+                    onChange={(e) =>
+                      e.target.files?.[0] && field.onChange(e.target.files[0])
+                    }
+                  />
+                </>
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <Button type="submit" disabled={isPending}>
           Actualizar!
         </Button>
