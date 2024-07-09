@@ -27,13 +27,13 @@ export default function ProductCard({
 }: ProductCardProps) {
   return (
     <Card
-      className="focus:ring-red flex flex-row gap-4 p-6 transition-all hover:shadow-lg active:outline-none active:ring-2"
+      className="focus:ring-red flex h-44 flex-row gap-4 p-6 transition-all hover:shadow-lg active:outline-none active:ring-2"
       id={`p-${product.id}`}
     >
       <Image
-        src={product.image || '/images/placeholder.webp'}
+        src={product.image || "/images/placeholder.webp"}
         alt={product.name}
-        className="h-20 w-20 self-center rounded-md dark:bg-card-foreground bg-transparent"
+        className="h-20 w-20 self-center rounded-md bg-transparent dark:bg-card-foreground"
         width={80}
         height={80}
         loading="lazy"
@@ -61,7 +61,7 @@ export default function ProductCard({
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="flex flex-row items-center justify-between p-0 flex-wrap">
+        <CardContent className="flex flex-row flex-wrap items-center justify-between p-0">
           <div className="flex space-x-4 text-sm text-muted-foreground">
             <div className="flex items-center">
               <CircleIcon className="mr-1 h-3 w-3 fill-primary stroke-primary text-primary" />
