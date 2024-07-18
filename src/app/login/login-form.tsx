@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
@@ -31,17 +30,11 @@ const schema = z.object({
 });
 
 export default function LoginForm() {
-  const router = useRouter();
   const { toast } = useToast();
-  const ctx = api.useUtils();
   const { mutate, status } = api.auth.signIn.useMutation({
     onSuccess() {
-      router.push("/");
-      toast({
-        title: "Has iniciado sesión correctamente",
-        variant: "default",
-      });
-      void ctx.invalidate();
+      // We need to revalidate all paths so we might as well reload the page XD
+      window.location.href = "/";
     },
     onError() {
       toast({
