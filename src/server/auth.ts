@@ -1,7 +1,6 @@
 import { DrizzleSQLiteAdapter } from "@lucia-auth/adapter-drizzle";
 import { Lucia, type Session, type User } from "lucia";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { cache } from "react";
 import { db } from "./db";
 import { sessionsTable, usersTable } from "./db/schema";

@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import React from "react";
 import ProductGrid from "~/components/features/cart/productGrid";
 import { validateRequest } from "~/server/auth";
 

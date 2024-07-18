@@ -1,3 +1,4 @@
+import { endOfDay, startOfDay } from "date-fns";
 import { z } from "zod";
 
 const hotkey = z
@@ -48,4 +49,17 @@ export const createSaleSchema = z.object({
       product,
     }),
   ),
+});
+
+export const dashboardSchema = z.object({
+  dateRange: z.object({
+    from: z
+      .date()
+      .optional()
+      .transform((v) => startOfDay(v ?? new Date(0))),
+    to: z
+      .date()
+      .optional()
+      .transform((v) => v && endOfDay(v)),
+  }),
 });

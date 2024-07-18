@@ -1,9 +1,11 @@
 "use client";
+import { keepPreviousData } from "@tanstack/react-query";
 import { type ColumnDef } from "@tanstack/react-table";
+import { ChevronsUpDown } from "lucide-react";
+import { type DateRange } from "react-day-picker";
+import { Button } from "~/components/ui/button";
 import { DataTable } from "~/components/ui/dataTable";
 import { formatCurrency } from "~/lib/utils";
-import { Button } from "~/components/ui/button";
-import { ChevronsUpDown } from "lucide-react";
 import { type RouterOutputs, api } from "~/trpc/react";
 
 type Product = RouterOutputs["sale"]["dashboard"]["salesByProduct"][number];
@@ -63,9 +65,23 @@ const columns: ColumnDef<Product>[] = [
   },
 ];
 
-export default function SalesTable() {
+export default function SalesTable({
+  dateRange,
+}: {
+  dateRange: DateRange | undefined;
+}) {
   const { data: { salesByProduct: data } = {}, isLoading } =
-    api.sale.dashboard.useQuery();
+    api.sale.dashboard.useQuery(
+      {
+        dateRange: dateRange ?? {
+          from: undefined,
+          to: undefined,
+        },
+      },
+      {
+        placeholderData: keepPreviousData,
+      },
+    );
   return (
     <div className="container mx-auto flex flex-col gap-5 py-10">
       <div className="flex flex-row items-center justify-between">

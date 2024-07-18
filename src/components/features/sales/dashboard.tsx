@@ -1,13 +1,24 @@
 "use client";
+import { keepPreviousData } from "@tanstack/react-query";
+import { DonutChart } from "@tremor/react";
 import { DollarSign, ShoppingBag, ShoppingCart, Trophy } from "lucide-react";
-import React from "react";
+import { type DateRange } from "react-day-picker";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { formatCurrency } from "~/lib/utils";
 import { api } from "~/trpc/react";
-import { DonutChart } from "@tremor/react";
 
-const SalesDashboard: React.FC = () => {
-  const { data, isLoading } = api.sale.dashboard.useQuery();
+const SalesDashboard = ({ dateRange }: { dateRange?: DateRange }) => {
+  const { data, isLoading } = api.sale.dashboard.useQuery(
+    {
+      dateRange: dateRange ?? {
+        from: undefined,
+        to: undefined,
+      },
+    },
+    {
+      placeholderData: keepPreviousData,
+    },
+  );
 
   if (isLoading) return <p>Cargando...</p>;
   if (!data) return <p>Error</p>;

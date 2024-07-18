@@ -1,5 +1,6 @@
-import { count, eq, inArray, sum } from "drizzle-orm";
-import { createSaleSchema } from "~/lib/schemas/product";
+import { format } from "date-fns";
+import { and, count, eq, gte, inArray, lte, sql, sum } from "drizzle-orm";
+import { createSaleSchema, dashboardSchema } from "~/lib/schemas/product";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
   productSalesTable,
@@ -67,81 +68,113 @@ export const saleRouter = createTRPCRouter({
 
       return sale;
     }),
-  dashboard: protectedProcedure.query(async ({ ctx }) => {
-    const allProducts = await ctx.db.query.productsTable.findMany({
-      where: (t, { eq }) => eq(t.organizationId, ctx.session.organizationId),
-    });
-    const productMap = new Map(
-      allProducts.map((product) => [product.id, product]),
-    );
-    const salesByProductAndPrice = await ctx.db
-      .select({
-        amount: sum(productSalesTable.amount).mapWith(Number),
-        price: productSalesTable.price,
-        productId: productSalesTable.productId,
-      })
-      .from(productSalesTable)
-      .groupBy(productSalesTable.productId, productSalesTable.price)
-      .where(({ productId }) =>
-        inArray(productId, [...allProducts.map((p) => p.id), ""]),
+  dashboard: protectedProcedure
+    .input(dashboardSchema)
+    .query(async ({ ctx, input }) => {
+      const allProducts = await ctx.db.query.productsTable.findMany({
+        where: (t, { eq }) => eq(t.organizationId, ctx.session.organizationId),
+      });
+      const productMap = new Map(
+        allProducts.map((product) => [product.id, product]),
+      );
+      const salesByProductAndPrice = await ctx.db
+        .select({
+          amount: sum(productSalesTable.amount).mapWith(Number),
+          price: productSalesTable.price,
+          productId: productSalesTable.productId,
+          createdAt: productSalesTable.createdAt,
+        })
+        .from(productSalesTable)
+        .groupBy(productSalesTable.productId, productSalesTable.price)
+        .where(({ productId, createdAt }) =>
+          and(
+            inArray(productId, [...allProducts.map((p) => p.id)]),
+            gte(
+              createdAt,
+              sql`${format(input.dateRange?.from ?? new Date(0), "yyyy-MM-dd")}`,
+            ),
+            input.dateRange.to &&
+              lte(
+                createdAt,
+                sql`${format(input.dateRange.to, "yyyy-MM-dd HH:mm:ss")}`,
+              ),
+          ),
+        );
+
+      const { numberOfSales } = (await ctx.db
+        .select({
+          total: sum(salesTable.total).mapWith(Number),
+          numberOfSales: count(),
+          organizationId: salesTable.organizationId,
+          createdAt: salesTable.createdAt,
+        })
+        .from(salesTable)
+        .where((t) =>
+          and(
+            eq(t.organizationId, ctx.session.organizationId),
+            gte(
+              t.createdAt,
+              sql`${format(input.dateRange?.from ?? new Date(0), "yyyy-MM-dd")}`,
+            ),
+            input.dateRange.to &&
+              lte(
+                t.createdAt,
+                sql`${format(input.dateRange.to, "yyyy-MM-dd HH:mm:ss")}`,
+              ),
+          ),
+        )
+        .then((res) => res.at(0))) ?? { total: 0, numberOfSales: 0 };
+
+      const salesByProductWithTotalPrice = salesByProductAndPrice.map(
+        (sale) => ({
+          ...sale,
+          totalPrice: (sale.amount ?? 0) * sale.price,
+          amount: sale.amount ?? 0,
+          product: productMap.get(sale.productId),
+        }),
       );
 
-    const { numberOfSales } = (await ctx.db
-      .select({
-        total: sum(salesTable.total).mapWith(Number),
-        numberOfSales: count(),
-        organizationId: salesTable.organizationId,
-      })
-      .from(salesTable)
-      .where((t) => eq(t.organizationId, ctx.session.organizationId))
-      .then((res) => res.at(0))) ?? { total: 0, numberOfSales: 0 };
+      const salesByProduct = salesByProductWithTotalPrice
+        .reduce(
+          (acc, sale) => {
+            const product = acc.find((p) => p.productId === sale.productId);
+            if (product) {
+              product.amount += sale.amount ?? 0;
+              product.totalPrice += sale.totalPrice;
+            } else {
+              acc.push(sale);
+            }
+            return acc;
+          },
+          [] as typeof salesByProductWithTotalPrice,
+        )
+        .sort((a, b) => b.totalPrice - a.totalPrice)
+        .map((sale) => ({
+          ...sale.product,
+          productId: sale.productId,
+          amount: sale.amount ?? 0,
+          totalPrice: sale.totalPrice,
+        }));
 
-    const salesByProductWithTotalPrice = salesByProductAndPrice.map((sale) => ({
-      ...sale,
-      totalPrice: (sale.amount ?? 0) * sale.price,
-      amount: sale.amount ?? 0,
-      product: productMap.get(sale.productId),
-    }));
+      const mostSoldProduct = salesByProduct.reduce((acc, product) =>
+        acc.amount > product.amount ? acc : product,
+      );
+      const productsSold = salesByProduct.reduce(
+        (acc, product) => acc + (product.amount ?? 0),
+        0,
+      );
 
-    const salesByProduct = salesByProductWithTotalPrice
-      .reduce(
-        (acc, sale) => {
-          const product = acc.find((p) => p.productId === sale.productId);
-          if (product) {
-            product.amount += sale.amount ?? 0;
-            product.totalPrice += sale.totalPrice;
-          } else {
-            acc.push(sale);
-          }
-          return acc;
-        },
-        [] as typeof salesByProductWithTotalPrice,
-      )
-      .sort((a, b) => b.totalPrice - a.totalPrice)
-      .map((sale) => ({
-        ...sale.product,
-        productId: sale.productId,
-        amount: sale.amount ?? 0,
-        totalPrice: sale.totalPrice,
-      }));
+      const totalSales = salesByProduct.reduce(
+        (acc, product) => acc + (product.totalPrice ?? 0),
+        0,
+      );
 
-    const mostSoldProduct = salesByProduct[0];
-    const productsSold = salesByProduct.reduce(
-      (acc, product) => acc + (product.amount ?? 0),
-      0,
-    );
-
-    const totalSales = salesByProduct.reduce(
-      (acc, product) => acc + (product.totalPrice ?? 0),
-      0,
-    );
-
-    return {
-      productsSold,
-      numberOfSales,
-      totalSales,
-      mostSoldProduct,
-      salesByProduct,
-    };
-  }),
+      return {
+        productsSold,
+        numberOfSales,
+        totalSales,
+        mostSoldProduct,
+        salesByProduct,
+      };
+    }),
 });
