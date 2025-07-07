@@ -48,6 +48,7 @@ export const productsTable = createTable("products", {
   stock: integer("stock").notNull(),
   image: text("image").notNull(),
   hotkey: text("hotkey"),
+  category: text("category"),
 });
 
 export const salesTable = createTable("sales", {

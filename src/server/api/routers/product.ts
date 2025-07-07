@@ -32,6 +32,7 @@ export const productRouter = createTRPCRouter({
           stock: input.stock,
           image,
           hotkey: input.hotkey ?? null,
+          category: input.category ?? null,
           organizationId: ctx.session.organizationId,
         })
         .returning()

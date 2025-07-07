@@ -12,10 +12,12 @@ I created this project because I had to sell products on a family business and I
 - [x] Product search
 - [x] Sales dashboard
 - [x] Sales report
-- [ ] User authentication
-- [ ] Organizations
-- [ ] Product categories
-- [ ] Product images
+- [x] User authentication
+- [x] Organizations
+- [x] Product categories
+- [x] Product images
+- [ ] Transactions CRUD
+- [ ] Events CRUD (Creating events with start and end date and being able to generate reports for them)
 
 ## Setup 🛠️
 

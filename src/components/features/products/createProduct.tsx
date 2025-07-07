@@ -1,15 +1,12 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-misused-promises */
-import {
-  Sheet,
-  SheetTrigger,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "~/components/ui/sheet";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Plus } from "lucide-react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { Button } from "~/components/ui/button";
+import Field from "~/components/ui/field";
 import {
   Form,
   FormControl,
@@ -18,16 +15,19 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { createProductSchema } from "~/lib/schemas/product";
-import { toast } from "~/components/ui/use-toast";
-import { useState } from "react";
-import { Plus } from "lucide-react";
-import Field from "~/components/ui/field";
-import { api } from "~/trpc/react";
 import { Input } from "~/components/ui/input";
-import { z } from "zod";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "~/components/ui/sheet";
+import { toast } from "~/components/ui/use-toast";
+import { createProductSchema } from "~/lib/schemas/product";
 import { fileHelper } from "~/lib/utils";
+import { api } from "~/trpc/react";
 
 function CreateProduct() {
   const [open, setOpen] = useState(false);
@@ -132,6 +132,12 @@ const ProductForm = ({ closeSheet }: { closeSheet: () => void }) => {
         />
 
         <Field name="hotkey" label="Hotkey" control={form.control} />
+        <Field
+          name="category"
+          label="Categoría"
+          control={form.control}
+          placeholder="bebida, comida, postre"
+        />
         <Button type="submit" disabled={isPending}>
           Agregar!
         </Button>

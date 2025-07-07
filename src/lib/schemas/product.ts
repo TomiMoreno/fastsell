@@ -13,6 +13,7 @@ export const createProductSchema = z.object({
   stock: z.coerce.number(),
   base64: z.string().optional(),
   hotkey,
+  category: z.string().optional(),
 });
 
 export type CreateProductSchema = z.infer<typeof createProductSchema>;
@@ -24,6 +25,7 @@ export const updateProductSchema = z.object({
   stock: z.coerce.number(),
   base64: z.string().optional(),
   hotkey,
+  category: z.string().optional(),
 });
 
 export type UpdateProductSchema = z.infer<typeof updateProductSchema>;
@@ -37,6 +39,7 @@ const product = z.object({
   price: z.number(),
   stock: z.number(),
   image: z.string(),
+  category: z.string().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
