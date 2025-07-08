@@ -137,6 +137,32 @@ export const saleRouter = createTRPCRouter({
       return { success: true };
     }),
 
+  // Procedimiento para eliminar una transacción
+  deleteTransaction: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      // Verificar que la transacción existe y pertenece a la organización
+      const sale = await ctx.db.query.salesTable.findFirst({
+        where: (t, { and, eq }) =>
+          and(
+            eq(t.id, input.id),
+            eq(t.organizationId, ctx.session.organizationId),
+          ),
+      });
+
+      if (!sale) throw new Error("Transaction not found");
+
+      // Eliminar primero los productSales asociados
+      await ctx.db
+        .delete(productSalesTable)
+        .where(eq(productSalesTable.saleId, input.id));
+
+      // Luego eliminar la venta
+      await ctx.db.delete(salesTable).where(eq(salesTable.id, input.id));
+
+      return { success: true };
+    }),
+
   create: protectedProcedure
     .input(createSaleSchema)
     .mutation(async ({ ctx, input }) => {

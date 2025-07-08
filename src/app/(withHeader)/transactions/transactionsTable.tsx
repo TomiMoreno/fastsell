@@ -10,6 +10,7 @@ import {
   ChevronRight,
   Edit,
   Save,
+  Trash2,
   X,
 } from "lucide-react";
 import { useState } from "react";
@@ -67,6 +68,23 @@ export function TransactionsTable() {
       toast({
         title: "Transacción actualizada",
         description: "Los cambios se han guardado correctamente",
+      });
+      void refetch();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteTransaction = api.sale.deleteTransaction.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "Transacción eliminada",
+        description: "La transacción se ha eliminado correctamente",
       });
       void refetch();
     },
@@ -156,6 +174,16 @@ export function TransactionsTable() {
     });
   };
 
+  const handleDelete = async (transactionId: string) => {
+    if (
+      confirm(
+        "¿Estás seguro de que quieres eliminar esta transacción? Esta acción no se puede deshacer.",
+      )
+    ) {
+      await deleteTransaction.mutateAsync({ id: transactionId });
+    }
+  };
+
   const updateProductSale = (
     transactionId: string,
     productSaleId: string,
@@ -199,7 +227,7 @@ export function TransactionsTable() {
                 <TableHead>Fecha</TableHead>
                 <TableHead>Total</TableHead>
                 <TableHead>Productos</TableHead>
-                <TableHead className="w-24">Acciones</TableHead>
+                <TableHead className="w-32">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -242,32 +270,45 @@ export function TransactionsTable() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {isEditing ? (
-                          <div className="flex gap-1">
-                            <Button
-                              size="sm"
-                              onClick={() => saveEditing(transaction)}
-                              disabled={updateTransaction.isPending}
-                            >
-                              <Save className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => cancelEditing(transaction.id)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => startEditing(transaction)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        )}
+                        <div className="flex gap-1">
+                          {isEditing ? (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={() => saveEditing(transaction)}
+                                disabled={updateTransaction.isPending}
+                              >
+                                <Save className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => cancelEditing(transaction.id)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => startEditing(transaction)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDelete(transaction.id)}
+                                disabled={deleteTransaction.isPending}
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
 
