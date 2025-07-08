@@ -27,6 +27,10 @@ const routes = [
     name: "Ventas",
     path: "/sales",
   },
+  {
+    name: "Transacciones",
+    path: "/transactions",
+  },
 ];
 
 export function MainNav() {

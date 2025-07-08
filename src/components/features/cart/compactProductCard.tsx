@@ -1,13 +1,13 @@
 "use client";
 import { CircleIcon, PlusIcon } from "@radix-ui/react-icons";
 import { MinusIcon, ShoppingBagIcon } from "lucide-react";
-import Image from "next/image";
 import { type ChangeEvent } from "react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Kbd } from "~/components/ui/kbd";
+import { ProductImage } from "~/components/ui/product-image";
 import { type Product } from "~/lib/schemas/product";
 import { formatCurrency } from "~/lib/utils";
 
@@ -48,12 +48,11 @@ export default function CompactProductCard({
           </div>
         )}
 
-        <Image
-          src={product.image || "/images/placeholder.webp"}
+        <ProductImage
+          src={product.image}
           alt={product.name}
           className="h-full w-full object-cover"
           fill
-          loading="lazy"
         />
 
         {/* Overlay with controls - only visible on hover */}
@@ -106,7 +105,7 @@ export default function CompactProductCard({
                   <Input
                     type="number"
                     value={amount ?? 0}
-                    className="h-6 w-12 bg-white text-center text-xs"
+                    className="h-6 w-12 bg-background text-center text-xs"
                     onChange={handleChange}
                   />
                   <Button

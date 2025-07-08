@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import { and, count, eq, gte, inArray, lte, sql, sum } from "drizzle-orm";
+import { z } from "zod";
 import { createSaleSchema, dashboardSchema } from "~/lib/schemas/product";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
@@ -12,6 +13,130 @@ export const saleRouter = createTRPCRouter({
   getAll: protectedProcedure.query(({ ctx }) => {
     return ctx.db.select().from(salesTable).all();
   }),
+
+  getTransactions: protectedProcedure
+    .input(
+      z.object({
+        page: z.number().min(1).default(1),
+        limit: z.number().min(1).max(100).default(10),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const offset = (input.page - 1) * input.limit;
+
+      const sales = await ctx.db.query.salesTable.findMany({
+        where: (t, { eq }) => eq(t.organizationId, ctx.session.organizationId),
+        orderBy: (t, { desc }) => [desc(t.createdAt)],
+        limit: input.limit,
+        offset,
+        with: {
+          productSales: {
+            with: {
+              product: true,
+            },
+          },
+        },
+      });
+
+      // Obtener el total de transacciones para la paginación
+      const totalCount = await ctx.db
+        .select({ count: count() })
+        .from(salesTable)
+        .where(eq(salesTable.organizationId, ctx.session.organizationId))
+        .then((res) => res[0]?.count ?? 0);
+
+      return {
+        sales,
+        pagination: {
+          page: input.page,
+          limit: input.limit,
+          total: totalCount,
+          totalPages: Math.ceil(totalCount / input.limit),
+        },
+      };
+    }),
+
+  getTransaction: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const sale = await ctx.db.query.salesTable.findFirst({
+        where: (t, { and, eq }) =>
+          and(
+            eq(t.id, input.id),
+            eq(t.organizationId, ctx.session.organizationId),
+          ),
+        with: {
+          productSales: {
+            with: {
+              product: true,
+            },
+          },
+        },
+      });
+
+      if (!sale) throw new Error("Transaction not found");
+      return sale;
+    }),
+
+  updateTransaction: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        productSales: z.array(
+          z.object({
+            id: z.string(),
+            amount: z.number().min(1),
+            price: z.number().min(0),
+          }),
+        ),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const sale = await ctx.db.query.salesTable.findFirst({
+        where: (t, { and, eq }) =>
+          and(
+            eq(t.id, input.id),
+            eq(t.organizationId, ctx.session.organizationId),
+          ),
+        with: {
+          productSales: {
+            with: {
+              product: true,
+            },
+          },
+        },
+      });
+
+      if (!sale) throw new Error("Transaction not found");
+
+      const newTotal = input.productSales.reduce(
+        (acc, ps) => acc + ps.amount * ps.price,
+        0,
+      );
+
+      for (const productSale of input.productSales) {
+        await ctx.db
+          .update(productSalesTable)
+          .set({
+            amount: productSale.amount,
+            price: productSale.price,
+            updatedAt: new Date(),
+          })
+          .where(eq(productSalesTable.id, productSale.id));
+      }
+
+      // Actualizar el total de la venta
+      await ctx.db
+        .update(salesTable)
+        .set({
+          total: newTotal,
+          updatedAt: new Date(),
+        })
+        .where(eq(salesTable.id, input.id));
+
+      return { success: true };
+    }),
+
   create: protectedProcedure
     .input(createSaleSchema)
     .mutation(async ({ ctx, input }) => {
@@ -156,8 +281,14 @@ export const saleRouter = createTRPCRouter({
           totalPrice: sale.totalPrice,
         }));
 
-      const mostSoldProduct = salesByProduct.reduce((acc, product) =>
-        acc.amount > product.amount ? acc : product,
+      const mostSoldProduct = salesByProduct.reduce(
+        (acc, product) => (acc.amount > product.amount ? acc : product),
+        salesByProduct.at(0) ?? {
+          amount: 0,
+          totalPrice: 0,
+          productId: "",
+          product: null,
+        },
       );
       const productsSold = salesByProduct.reduce(
         (acc, product) => acc + (product.amount ?? 0),
