@@ -19,7 +19,7 @@ export interface KbdProps
     VariantProps<typeof kbdVariants> {}
 
 const Kbd = React.forwardRef<HTMLElement, KbdProps>(
-  ({ className, disabled = false, children = "_", ...props }, ref) => {
+  ({ className, disabled = false, ...props }, ref) => {
     return (
       <kbd
         ref={ref}
@@ -31,9 +31,7 @@ const Kbd = React.forwardRef<HTMLElement, KbdProps>(
           audio.play().catch((err) => console.error(err));
         }}
         {...props}
-      >
-        {children}
-      </kbd>
+      />
     );
   },
 );

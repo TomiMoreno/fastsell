@@ -14,6 +14,7 @@ import SeedButtons from "./_sections/seed-buttons";
 
 import { redirect } from "next/navigation";
 import { validateRequest } from "~/server/auth";
+import CartType from "./_sections/cart-type";
 import MyOrganization from "./_sections/my-organization";
 import ThemePreferences from "./_sections/theme-preferences";
 
@@ -24,6 +25,7 @@ export default async function Page() {
     <div className="flex grow flex-col gap-6">
       <MyOrganization />
       <ThemePreferences />
+      <CartType />
       {env.NODE_ENV === "development" && (
         <Card>
           <CardHeader>

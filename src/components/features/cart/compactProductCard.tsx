@@ -37,7 +37,7 @@ export default function CompactProductCard({
       {/* Product Image */}
       <div className="relative h-full w-full">
         {/* Hotkey - Always visible */}
-        {product.hotkey && (
+        {product.hotkey?.trim() && (
           <div className="absolute right-2 top-2 z-10">
             <Kbd
               className="w-fit border-white/20 bg-black/80 text-white"
