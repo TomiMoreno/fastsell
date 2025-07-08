@@ -1,0 +1,186 @@
+# FastSell - Cursor Rules
+
+## Project Overview
+
+FastSell is a T3 stack application (Next.js, tRPC, TypeScript) for selling products online. Built with:
+
+- Next.js 14 with App Router
+- tRPC for type-safe APIs
+- Drizzle ORM with SQLite (Turso)
+- Lucia Auth
+- Tailwind CSS + shadcn/ui
+- Zustand for state management
+- React Hook Form + Zod validation
+
+## Code Style & Conventions
+
+### TypeScript
+
+- Use strict TypeScript with proper type annotations
+- Prefer interfaces over types for object shapes
+- Use `server-only` package for server-side code
+- Leverage tRPC's type safety throughout the app
+
+### React/Next.js
+
+- Use App Router patterns (page.tsx, layout.tsx)
+- Prefer server components by default, use client components only when needed
+- Use proper Next.js patterns for data fetching
+- Follow the existing folder structure: `(withHeader)` for authenticated routes
+
+### Styling
+
+- Use Tailwind CSS with the existing configuration
+- Follow shadcn/ui component patterns
+- Use `cn()` utility for conditional classes
+- Prefer CSS-in-JS patterns from the existing codebase
+
+### Database
+
+- Use Drizzle ORM for all database operations
+- Follow existing schema patterns in `src/server/db/schema.ts`
+- Use the predefined database commands from package.json:
+  - `npm run db:push` for schema changes
+  - `npm run db:generate` for migrations
+  - `npm run db:seed` for seeding data
+
+### Authentication
+
+- Use Lucia Auth for authentication
+- Follow existing auth patterns in `src/server/auth.ts`
+- Use organization-based access control
+
+### State Management
+
+- Use Zustand for global state
+- Use React Hook Form for form state
+- Prefer server state over client state when possible
+
+## File Organization
+
+### Components
+
+- UI components in `src/components/ui/`
+- Feature components in `src/components/features/`
+- Theme components in `src/components/theme/`
+
+### Server
+
+- API routes in `src/server/api/routers/`
+- Database schema in `src/server/db/`
+- Services in `src/server/services/`
+
+### Client
+
+- Pages in `src/app/`
+- tRPC client setup in `src/trpc/`
+- Utilities in `src/lib/`
+
+## Best Practices
+
+### Performance
+
+- Use React Query for server state caching
+- Implement proper loading states
+- Use Next.js Image component for images
+- Optimize bundle size with proper imports
+
+### Security
+
+- Validate all inputs with Zod schemas
+- Use proper authentication checks
+- Sanitize user inputs
+- Follow the principle of least privilege
+
+### Error Handling
+
+- Use proper error boundaries
+- Implement meaningful error messages
+- Log errors appropriately
+- Handle edge cases gracefully
+
+## Development Workflow
+
+### Database Changes
+
+1. Modify schema in `src/server/db/schema.ts`
+2. Run `npm run db:generate` to create migration
+3. Run `npm run db:push` to apply changes
+4. Update seed data if needed
+
+### Adding New Features
+
+1. Create tRPC router if needed
+2. Add proper TypeScript types
+3. Create UI components following existing patterns
+4. Add proper validation with Zod
+5. Test with seed data
+
+### Code Quality
+
+- Follow existing ESLint configuration
+- Use Prettier for formatting
+- Write meaningful commit messages
+- Test functionality before committing
+
+## Common Patterns
+
+### tRPC Procedures
+
+```typescript
+// Input validation
+const input = z.object({...})
+
+// Protected procedures
+const protectedProcedure = t.procedure.use(enforceUserIsAuthed)
+
+// Organization-scoped procedures
+const organizationProcedure = protectedProcedure.use(enforceUserIsAuthed)
+  .input(z.object({ organizationId: z.string() }))
+```
+
+### Component Structure
+
+```typescript
+// Server component
+export default async function Page() {
+  // Server-side data fetching
+  return <ClientComponent data={data} />
+}
+
+// Client component
+'use client'
+export function ClientComponent({ data }: Props) {
+  // Client-side logic
+}
+```
+
+### Form Handling
+
+```typescript
+const form = useForm<FormData>({
+  resolver: zodResolver(schema),
+  defaultValues: {...}
+})
+```
+
+## Hotkeys & UX
+
+- Implement keyboard shortcuts for common actions
+- Use proper focus management
+- Provide clear feedback for user actions
+- Follow accessibility guidelines
+
+## Testing
+
+- Test database operations with seed data
+- Verify authentication flows
+- Test form validation
+- Check responsive design
+
+## Deployment
+
+- Configure environment variables properly
+- Use Vercel for hosting
+- Set up proper database connections
+- Configure authentication providers
