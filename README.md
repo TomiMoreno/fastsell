@@ -16,8 +16,10 @@ I created this project because I had to sell products on a family business and I
 - [x] Organizations
 - [x] Product categories
 - [x] Product images
-- [ ] Transactions CRUD
+- [x] Transactions CRUD
 - [ ] Events CRUD (Creating events with start and end date and being able to generate reports for them)
+- [ ] User management for admins
+- [ ] User facing cart and checkout
 
 ## Setup 🛠️
 
