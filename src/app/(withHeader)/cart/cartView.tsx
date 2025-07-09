@@ -1,6 +1,7 @@
 "use client";
 import CompactProductGrid from "~/components/features/cart/compactProductGrid";
 import ProductGrid from "~/components/features/cart/productGrid";
+import ReceiptDrawer from "~/components/features/cart/receiptDrawer";
 import useCartType from "~/components/features/cart/useCartType";
 import ProductTable from "~/components/features/products/productTable";
 
@@ -11,6 +12,7 @@ export default function CartView() {
     <div className="container mx-auto py-4">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Carrito de Compras</h1>
+        <ReceiptDrawer />
       </div>
 
       {cartType === "compact" ? (

@@ -21,8 +21,8 @@ export const saleRouter = createTRPCRouter({
         limit: z.number().min(1).max(100).default(10),
         dateRange: z
           .object({
-            from: z.date().optional(),
-            to: z.date().optional(),
+            from: z.coerce.date().optional(),
+            to: z.coerce.date().optional(),
           })
           .optional(),
       }),
@@ -35,11 +35,21 @@ export const saleRouter = createTRPCRouter({
           const conditions = [eq(t.organizationId, ctx.session.organizationId)];
 
           if (input.dateRange?.from) {
-            conditions.push(gte(t.createdAt, input.dateRange.from));
+            conditions.push(
+              gte(
+                t.createdAt,
+                sql`${format(input.dateRange.from, "yyyy-MM-dd")}`,
+              ),
+            );
           }
 
           if (input.dateRange?.to) {
-            conditions.push(lte(t.createdAt, input.dateRange.to));
+            conditions.push(
+              lte(
+                t.createdAt,
+                sql`${format(input.dateRange.to, "yyyy-MM-dd HH:mm:ss")}`,
+              ),
+            );
           }
 
           return and(...conditions);
@@ -62,11 +72,21 @@ export const saleRouter = createTRPCRouter({
       ];
 
       if (input.dateRange?.from) {
-        countConditions.push(gte(salesTable.createdAt, input.dateRange.from));
+        countConditions.push(
+          gte(
+            salesTable.createdAt,
+            sql`${format(input.dateRange.from, "yyyy-MM-dd")}`,
+          ),
+        );
       }
 
       if (input.dateRange?.to) {
-        countConditions.push(lte(salesTable.createdAt, input.dateRange.to));
+        countConditions.push(
+          lte(
+            salesTable.createdAt,
+            sql`${format(input.dateRange.to, "yyyy-MM-dd HH:mm:ss")}`,
+          ),
+        );
       }
 
       const totalCount = await ctx.db

@@ -1,5 +1,4 @@
 "use client";
-import { Receipt } from "lucide-react";
 import {
   useCallback,
   useMemo,
@@ -15,13 +14,11 @@ import { type Product } from "~/lib/schemas/product";
 import { useCart } from "~/lib/store";
 import { api } from "~/trpc/react";
 import CompactProductCard from "./compactProductCard";
-import ProductsResume from "./productsResume";
 import useHotkeys from "./useHotkeys";
 
 function CompactProductGrid() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [showReceipt, setShowReceipt] = useState(false);
   const ref = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { data: products } = api.product.getAll.useQuery();
@@ -96,15 +93,6 @@ function CompactProductGrid() {
     <div className="container mx-auto py-10">
       <div className="flex w-full items-center justify-between gap-4">
         <h1 className="text-3xl font-bold">Productos</h1>
-        <div className="flex flex-row gap-4">
-          <Button
-            onClick={() => setShowReceipt((showReceipt) => !showReceipt)}
-            size="icon"
-            variant={showReceipt ? "accent" : "outline"}
-          >
-            <Receipt strokeWidth={1} />
-          </Button>
-        </div>
       </div>
 
       {/* Search Input */}
@@ -167,12 +155,6 @@ function CompactProductGrid() {
             />
           ))}
         </div>
-
-        {showReceipt && (
-          <div className="grow-0 basis-[300px]">
-            <ProductsResume items={Array.from(items.values())} total={total} />
-          </div>
-        )}
 
         <Button
           variant="default"
