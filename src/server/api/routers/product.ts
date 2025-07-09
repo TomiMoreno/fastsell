@@ -16,6 +16,15 @@ export const productRouter = createTRPCRouter({
       where: (t, { eq }) => eq(t.organizationId, ctx.session.organizationId),
     });
   }),
+  getEnabled: protectedProcedure.query(({ ctx }) => {
+    return ctx.db.query.productsTable.findMany({
+      where: (t, { eq, and }) =>
+        and(
+          eq(t.organizationId, ctx.session.organizationId),
+          eq(t.enabled, true),
+        ),
+    });
+  }),
   create: protectedProcedure
     .input(createProductSchema)
     .mutation(async ({ ctx, input }) => {
@@ -63,5 +72,20 @@ export const productRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await ctx.db.delete(productsTable).where(eq(productsTable.id, input));
       await ImageService.deleteImage(`product_${input}`);
+    }),
+  toggleEnabled: protectedProcedure
+    .input(z.string())
+    .mutation(async ({ ctx, input }) => {
+      const product = await ctx.db.query.productsTable.findFirst({
+        where: (t, { eq }) => eq(t.id, input),
+      });
+      if (!product) throw new TRPCError({ code: "NOT_FOUND" });
+
+      return ctx.db
+        .update(productsTable)
+        .set({ enabled: !product.enabled })
+        .where(eq(productsTable.id, input))
+        .returning()
+        .then(([p]) => p);
     }),
 });

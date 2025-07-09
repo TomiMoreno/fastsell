@@ -49,6 +49,7 @@ export const productsTable = createTable("products", {
   image: text("image").notNull(),
   hotkey: text("hotkey"),
   category: text("category"),
+  enabled: integer("enabled", { mode: "boolean" }).default(true).notNull(),
 });
 
 export const salesTable = createTable("sales", {

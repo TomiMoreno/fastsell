@@ -40,6 +40,7 @@ const product = z.object({
   stock: z.number(),
   image: z.string(),
   category: z.string().nullable(),
+  enabled: z.boolean(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });

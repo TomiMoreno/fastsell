@@ -10,7 +10,7 @@ export default function useHotkeys({
   ref: React.RefObject<HTMLElement>;
   handleBuy: () => void;
 }) {
-  const { data: products } = api.product.getAll.useQuery();
+  const { data: products } = api.product.getEnabled.useQuery();
   const { addToCart, removeFromCart, reset } = useCart();
 
   // Add hotkeys to add products to cart

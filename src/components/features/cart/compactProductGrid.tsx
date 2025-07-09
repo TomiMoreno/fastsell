@@ -21,7 +21,7 @@ function CompactProductGrid() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const ref = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const { data: products } = api.product.getAll.useQuery();
+  const { data: products } = api.product.getEnabled.useQuery();
   const utils = api.useUtils();
   const { mutateAsync, isPending } = api.sale.create.useMutation({
     onSuccess: () => {

@@ -1,0 +1,1 @@
+ALTER TABLE `fastsell_products` ADD `enabled` integer DEFAULT true NOT NULL;

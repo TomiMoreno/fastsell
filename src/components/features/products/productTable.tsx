@@ -1,13 +1,30 @@
 "use client";
 import { type ColumnDef } from "@tanstack/react-table";
-import { DataTable } from "~/components/ui/dataTable";
 import UpdateProduct from "~/components/features/products/updateProduct";
-import { formatCurrency } from "~/lib/utils";
+import { DataTable } from "~/components/ui/dataTable";
 import { Kbd } from "~/components/ui/kbd";
-import DeleteProduct from "./deleteProduct";
+import { Switch } from "~/components/ui/switch";
+import { formatCurrency } from "~/lib/utils";
 import { api, type RouterOutputs } from "~/trpc/react";
+import DeleteProduct from "./deleteProduct";
 
 type Product = RouterOutputs["product"]["getAll"][0];
+
+function ToggleEnabled({ product }: { product: Product }) {
+  const utils = api.useUtils();
+  const { mutate: toggleEnabled } = api.product.toggleEnabled.useMutation({
+    onSuccess: () => {
+      void utils.product.getAll.invalidate();
+    },
+  });
+
+  return (
+    <Switch
+      checked={product.enabled}
+      onCheckedChange={() => toggleEnabled(product.id)}
+    />
+  );
+}
 
 const columns: ColumnDef<Product>[] = [
   {
@@ -30,6 +47,10 @@ const columns: ColumnDef<Product>[] = [
         {row.original.hotkey ?? "_"}
       </Kbd>
     ),
+  },
+  {
+    header: "Habilitado",
+    cell: ({ row }) => <ToggleEnabled product={row.original} />,
   },
   {
     header: "Editar",
