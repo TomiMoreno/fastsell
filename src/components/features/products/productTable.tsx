@@ -32,6 +32,11 @@ const columns: ColumnDef<Product>[] = [
     header: "Nombre",
   },
   {
+    accessorKey: "category",
+    header: "Categoría",
+    cell: ({ row }) => row.original.category ?? "-",
+  },
+  {
     accessorKey: "stock",
     header: "Stock",
   },

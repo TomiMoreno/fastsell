@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { endOfDay, format } from "date-fns";
 import { and, count, eq, gte, inArray, lte, sql, sum } from "drizzle-orm";
 import { z } from "zod";
 import { createSaleSchema, dashboardSchema } from "~/lib/schemas/product";
@@ -47,10 +47,12 @@ export const saleRouter = createTRPCRouter({
             conditions.push(
               lte(
                 t.createdAt,
-                sql`${format(input.dateRange.to, "yyyy-MM-dd HH:mm:ss")}`,
+                sql`${format(endOfDay(input.dateRange.to), "yyyy-MM-dd HH:mm:ss")}`,
               ),
             );
           }
+
+          console.log(conditions);
 
           return and(...conditions);
         },
@@ -84,7 +86,7 @@ export const saleRouter = createTRPCRouter({
         countConditions.push(
           lte(
             salesTable.createdAt,
-            sql`${format(input.dateRange.to, "yyyy-MM-dd HH:mm:ss")}`,
+            sql`${format(endOfDay(input.dateRange.to), "yyyy-MM-dd HH:mm:ss")}`,
           ),
         );
       }

@@ -56,7 +56,7 @@ export default function CompactProductCard({
         />
 
         {/* Overlay with controls - only visible on hover */}
-        <div className="absolute inset-0 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+        <div className="absolute inset-0  transition-opacity group-hover:opacity-100">
           <div className="flex h-full flex-col justify-between p-3">
             {/* Top section - Category only */}
             <div className="flex items-start justify-between">
@@ -70,7 +70,7 @@ export default function CompactProductCard({
             </div>
 
             {/* Bottom section - Product info and controls */}
-            <div className="space-y-2">
+            <div className="m-[-12px] space-y-2 bg-black/50 p-3">
               {/* Product name and price */}
               <div className="text-white">
                 <h3 className="line-clamp-2 text-sm font-semibold">

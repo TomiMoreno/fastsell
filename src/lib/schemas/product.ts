@@ -4,7 +4,8 @@ import { z } from "zod";
 const hotkey = z
   .string()
   .max(1)
-  .transform((v) => v || null)
+  .optional()
+  .transform((v) => v ?? null)
   .nullable();
 
 export const createProductSchema = z.object({
