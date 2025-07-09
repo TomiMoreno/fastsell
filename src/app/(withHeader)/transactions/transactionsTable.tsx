@@ -1,5 +1,6 @@
 "use client";
 
+import { keepPreviousData } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import {
@@ -9,11 +10,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Edit,
+  Loader2,
   Save,
   Trash2,
   X,
 } from "lucide-react";
 import { useState } from "react";
+import { type DateRange } from "react-day-picker";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
@@ -54,14 +57,27 @@ type Transaction = {
   }>;
 };
 
-export function TransactionsTable() {
+interface TransactionsTableProps {
+  dateRange?: DateRange;
+}
+
+export function TransactionsTable({ dateRange }: TransactionsTableProps) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
-  const { data, refetch } = api.sale.getTransactions.useQuery({
-    page,
-    limit,
-  });
+  const { data, refetch, isFetching } = api.sale.getTransactions.useQuery(
+    {
+      page,
+      limit,
+      dateRange: dateRange ?? {
+        from: undefined,
+        to: undefined,
+      },
+    },
+    {
+      placeholderData: keepPreviousData,
+    },
+  );
 
   const updateTransaction = api.sale.updateTransaction.useMutation({
     onSuccess: () => {
@@ -215,8 +231,52 @@ export function TransactionsTable() {
     return <div>Cargando transacciones...</div>;
   }
 
+  // Empty state when no transactions found
+  if (transactions.length === 0) {
+    return (
+      <div className="space-y-4">
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <div className="text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                <svg
+                  className="h-8 w-8 text-muted-foreground"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+              </div>
+              <h3 className="mb-2 text-lg font-semibold">
+                No hay transacciones
+              </h3>
+              <p className="text-muted-foreground">
+                {dateRange?.from ?? dateRange?.to
+                  ? "No se encontraron transacciones en el rango de fechas seleccionado."
+                  : "No hay transacciones registradas aún."}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
+      {isFetching && (
+        <div className="flex items-center justify-center py-4">
+          <Loader2 className="mr-2 size-5 animate-spin" />
+          <span>Cargando transacciones...</span>
+        </div>
+      )}
       <Card>
         <CardContent className="p-0">
           <Table>

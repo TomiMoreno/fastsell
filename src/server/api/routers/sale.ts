@@ -19,13 +19,31 @@ export const saleRouter = createTRPCRouter({
       z.object({
         page: z.number().min(1).default(1),
         limit: z.number().min(1).max(100).default(10),
+        dateRange: z
+          .object({
+            from: z.date().optional(),
+            to: z.date().optional(),
+          })
+          .optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
       const offset = (input.page - 1) * input.limit;
 
       const sales = await ctx.db.query.salesTable.findMany({
-        where: (t, { eq }) => eq(t.organizationId, ctx.session.organizationId),
+        where: (t, { and, eq, gte, lte }) => {
+          const conditions = [eq(t.organizationId, ctx.session.organizationId)];
+
+          if (input.dateRange?.from) {
+            conditions.push(gte(t.createdAt, input.dateRange.from));
+          }
+
+          if (input.dateRange?.to) {
+            conditions.push(lte(t.createdAt, input.dateRange.to));
+          }
+
+          return and(...conditions);
+        },
         orderBy: (t, { desc }) => [desc(t.createdAt)],
         limit: input.limit,
         offset,
@@ -38,11 +56,23 @@ export const saleRouter = createTRPCRouter({
         },
       });
 
-      // Obtener el total de transacciones para la paginación
+      // Obtener el total de transacciones para la paginación con filtros de fecha
+      const countConditions = [
+        eq(salesTable.organizationId, ctx.session.organizationId),
+      ];
+
+      if (input.dateRange?.from) {
+        countConditions.push(gte(salesTable.createdAt, input.dateRange.from));
+      }
+
+      if (input.dateRange?.to) {
+        countConditions.push(lte(salesTable.createdAt, input.dateRange.to));
+      }
+
       const totalCount = await ctx.db
         .select({ count: count() })
         .from(salesTable)
-        .where(eq(salesTable.organizationId, ctx.session.organizationId))
+        .where(and(...countConditions))
         .then((res) => res[0]?.count ?? 0);
 
       return {
